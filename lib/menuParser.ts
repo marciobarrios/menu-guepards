@@ -1,7 +1,6 @@
 import { DailyMenu, ParsedMenuResult } from "./types";
 
 const LUNCH_DISHES_PER_DAY = 3;
-const DINNER_DISHES_PER_DAY = 2;
 
 function getWeekdaysInMonth(year: number, month: number, startDay: number = 1): number[] {
   const weekdays: number[] = [];
@@ -89,13 +88,39 @@ function extractDishesFromLines(text: string): string[] {
   return dishes.filter((d) => d.length >= 5);
 }
 
-function groupDishesIntoDays(dishes: string[], dishesPerDay: number): string[][] {
+function groupLunchDishesIntoDays(dishes: string[]): string[][] {
   const days: string[][] = [];
 
-  for (let i = 0; i < dishes.length; i += dishesPerDay) {
-    const dayDishes = dishes.slice(i, i + dishesPerDay);
+  for (let i = 0; i < dishes.length; i += LUNCH_DISHES_PER_DAY) {
+    const dayDishes = dishes.slice(i, i + LUNCH_DISHES_PER_DAY);
     if (dayDishes.length > 0) {
       days.push(dayDishes);
+    }
+  }
+
+  return days;
+}
+
+function groupDinnerDishesIntoDays(dishes: string[]): string[][] {
+  // Dinner menus have 2 dishes per day, EXCEPT when a dish contains "plat únic"
+  // which means it's a single-dish day
+  const days: string[][] = [];
+  let i = 0;
+
+  while (i < dishes.length) {
+    const dish = dishes[i];
+
+    // Check if this is a "plat únic" (single dish day)
+    if (dish.toLowerCase().includes("plat únic")) {
+      days.push([dish]);
+      i += 1;
+    } else {
+      // Normal 2-dish day
+      const dayDishes = dishes.slice(i, i + 2);
+      if (dayDishes.length > 0) {
+        days.push(dayDishes);
+      }
+      i += 2;
     }
   }
 
@@ -128,11 +153,10 @@ export async function parsePdfBuffer(
       };
     }
 
-    // Determine dishes per day based on format
-    const dishesPerDay = hasDashes ? LUNCH_DISHES_PER_DAY : DINNER_DISHES_PER_DAY;
-
-    // Group dishes into days
-    const daysOfDishes = groupDishesIntoDays(dishes, dishesPerDay);
+    // Group dishes into days based on type
+    const daysOfDishes = hasDashes
+      ? groupLunchDishesIntoDays(dishes)
+      : groupDinnerDishesIntoDays(dishes);
 
     // Get weekdays in the month starting from startDay
     const weekdays = getWeekdaysInMonth(year, month, startDay);
