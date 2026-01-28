@@ -210,35 +210,40 @@
     {
       "day": 23,
       "dishes": [
-        "Curry de cigrons amb llet de coco i verduretes",
-        "Amanida verda variada amb viangreta de mel i mostassa"
+        "Curry de cigrons amb llet de coco i verduretes"
       ]
     },
     {
       "day": 26,
       "dishes": [
-        "Hamburgueses de salmó i formatge feta amb xips de boniato al forn",
-        "Crema de col lombarda, patata i poma"
+        "Amanida verda variada amb viangreta de mel i mostassa",
+        "Hamburgueses de salmó i formatge feta amb xips de boniato al forn"
       ]
     },
     {
       "day": 27,
       "dishes": [
-        "Truita de calçots",
-        "Estofat de llenties amb xoriço"
+        "Crema de col lombarda, patata i poma",
+        "Truita de calçots"
       ]
     },
     {
       "day": 28,
       "dishes": [
-        "Pollastre a la planxa amb enciam i ravanets encurtits",
-        "Hummus de cigrons amb crudités"
+        "Estofat de llenties amb xoriço",
+        "Pollastre a la planxa amb enciam i ravanets encurtits"
       ]
     },
     {
       "day": 29,
       "dishes": [
-        "Gall dindi al forn amb ceba caramelitzada",
+        "Hummus de cigrons amb crudités",
+        "Gall dindi al forn amb ceba caramelitzada"
+      ]
+    },
+    {
+      "day": 30,
+      "dishes": [
         "Quiche d'espinacs i formatge"
       ]
     }
