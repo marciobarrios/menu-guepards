@@ -3,11 +3,11 @@ import { DailyMenu, ParsedMenuResult } from "./types";
 const LUNCH_DISHES_PER_DAY = 3;
 const DINNER_DISHES_PER_DAY = 2;
 
-function getWeekdaysInMonth(year: number, month: number): number[] {
+function getWeekdaysInMonth(year: number, month: number, startDay: number = 1): number[] {
   const weekdays: number[] = [];
   const daysInMonth = new Date(year, month, 0).getDate();
 
-  for (let day = 1; day <= daysInMonth; day++) {
+  for (let day = startDay; day <= daysInMonth; day++) {
     const date = new Date(year, month - 1, day);
     const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
     if (dayOfWeek >= 1 && dayOfWeek <= 5) {
@@ -38,6 +38,7 @@ function extractDishesWithDashes(text: string): string[] {
       if (p.includes("@")) return false;
       if (p.includes("ESCOLA")) return false;
       if (p.includes("BASAL")) return false;
+      if (p.includes("GASTRONOMIA")) return false;
       if (/^\d{3}/.test(p)) return false;
       return true;
     });
@@ -55,6 +56,7 @@ function extractDishesFromLines(text: string): string[] {
       if (l.includes("ESCOLA")) return false;
       if (l.includes("BASAL")) return false;
       if (l.includes("SOPARS")) return false;
+      if (l.includes("GASTRONOMIA")) return false;
       if (/^\d{3}/.test(l)) return false;
       return true;
     });
@@ -103,7 +105,8 @@ function groupDishesIntoDays(dishes: string[], dishesPerDay: number): string[][]
 export async function parsePdfBuffer(
   buffer: Buffer,
   year: number,
-  month: number
+  month: number,
+  startDay: number = 1
 ): Promise<ParsedMenuResult> {
   try {
     // Dynamic import of pdf-parse
@@ -131,8 +134,8 @@ export async function parsePdfBuffer(
     // Group dishes into days
     const daysOfDishes = groupDishesIntoDays(dishes, dishesPerDay);
 
-    // Get weekdays in the month
-    const weekdays = getWeekdaysInMonth(year, month);
+    // Get weekdays in the month starting from startDay
+    const weekdays = getWeekdaysInMonth(year, month, startDay);
 
     if (daysOfDishes.length > weekdays.length) {
       console.warn(

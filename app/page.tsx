@@ -33,6 +33,7 @@ export default function Home() {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [startDay, setStartDay] = useState(1);
 
   const [lunchFile, setLunchFile] = useState<File | null>(null);
   const [dinnerFile, setDinnerFile] = useState<File | null>(null);
@@ -72,6 +73,7 @@ export default function Home() {
     formData.append("type", type);
     formData.append("year", selectedYear.toString());
     formData.append("month", selectedMonth.toString());
+    formData.append("startDay", startDay.toString());
     formData.append("save", "false");
 
     try {
@@ -110,6 +112,7 @@ export default function Home() {
     formData.append("type", type);
     formData.append("year", selectedYear.toString());
     formData.append("month", selectedMonth.toString());
+    formData.append("startDay", startDay.toString());
     formData.append("save", "true");
 
     try {
@@ -191,30 +194,50 @@ export default function Home() {
       {/* Month/Year Selector */}
       <section className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Selecciona el mes</h2>
-        <div className="flex gap-4">
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value, 10))}
-            className="border rounded-lg px-4 py-2 text-gray-700"
-          >
-            {MONTHS.map((name, i) => (
-              <option key={i} value={i + 1}>
-                {name}
-              </option>
-            ))}
-          </select>
-          <select
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
-            className="border rounded-lg px-4 py-2 text-gray-700"
-          >
-            {[2024, 2025, 2026, 2027].map((y) => (
-              <option key={y} value={y}>
-                {y}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-wrap gap-4 items-end">
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Mes</label>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value, 10))}
+              className="border rounded-lg px-4 py-2 text-gray-700"
+            >
+              {MONTHS.map((name, i) => (
+                <option key={i} value={i + 1}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Any</label>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+              className="border rounded-lg px-4 py-2 text-gray-700"
+            >
+              {[2024, 2025, 2026, 2027].map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Primer dia amb menú</label>
+            <input
+              type="number"
+              min={1}
+              max={31}
+              value={startDay}
+              onChange={(e) => setStartDay(parseInt(e.target.value, 10) || 1)}
+              className="border rounded-lg px-4 py-2 text-gray-700 w-20"
+            />
+          </div>
         </div>
+        <p className="text-sm text-gray-500 mt-2">
+          Indica el primer dia del mes que té menú (ex: 8 si els dies 1-7 són festius)
+        </p>
       </section>
 
       {/* Upload Section */}
