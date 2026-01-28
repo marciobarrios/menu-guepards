@@ -3,7 +3,7 @@
   "month": 1,
   "lunch": [
     {
-      "day": 1,
+      "day": 8,
       "dishes": [
         "Arròs amb tomàquet i orenga",
         "Truita de formatge amb pastanaga ratllada i olives",
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "day": 2,
+      "day": 9,
       "dishes": [
         "Estofat de llenties amb verdures de temporada",
         "Bacallà al forn amb moniato",
@@ -19,7 +19,7 @@
       ]
     },
     {
-      "day": 5,
+      "day": 12,
       "dishes": [
         "Crema de calçots",
         "Pernilets de pollastre al forn amb enciam i pastanaga",
@@ -27,7 +27,7 @@
       ]
     },
     {
-      "day": 6,
+      "day": 13,
       "dishes": [
         "Arròs amb verduretes",
         "Truita de patata amb enciam i col lombarda",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "day": 7,
+      "day": 14,
       "dishes": [
         "Sopa de brou d'au amb pistons",
         "Daus de gall dindi amb cigrons estofats",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "day": 8,
+      "day": 15,
       "dishes": [
         "Trinxat de col i patata",
         "Lluç enfarinat amb enciam i colrave",
@@ -51,7 +51,7 @@
       ]
     },
     {
-      "day": 9,
+      "day": 16,
       "dishes": [
         "Guisat de mongeta blanca amb ceba i pastanaga",
         "Mandonguilles vegetals amb salsa de tomàquet i ceba",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "day": 12,
+      "day": 19,
       "dishes": [
         "Espaguetis amb bolonyesa de pollastre",
         "Amanida variada complerta",
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "day": 13,
+      "day": 20,
       "dishes": [
         "Bledes i patates rostides al forn",
         "Hamburguesa de vedella amb escarola i pastanaga",
@@ -75,7 +75,7 @@
       ]
     },
     {
-      "day": 14,
+      "day": 21,
       "dishes": [
         "Crema de carbassa",
         "Lluç a la marinera amb patates",
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "day": 15,
+      "day": 22,
       "dishes": [
         "Llenties estofades amb verdures de temporada",
         "Truita de calçots amb enciam i olives",
@@ -91,7 +91,7 @@
       ]
     },
     {
-      "day": 16,
+      "day": 23,
       "dishes": [
         "Sopa de brou vegetal amb mill i cigrons",
         "Arròs integral a la cassola amb carn de porc",
@@ -99,7 +99,7 @@
       ]
     },
     {
-      "day": 19,
+      "day": 26,
       "dishes": [
         "Coliflor gratinada al forn",
         "Ous durs amb salsa de tomàquet",
@@ -107,7 +107,7 @@
       ]
     },
     {
-      "day": 20,
+      "day": 27,
       "dishes": [
         "Cigrons guisats amb espinacs",
         "Hamburguesa de pollastre amb amanida verda variada",
@@ -115,7 +115,7 @@
       ]
     },
     {
-      "day": 21,
+      "day": 28,
       "dishes": [
         "Crema de pastanaga",
         "Fideus a la cassola amb all i oli de mongeta blanca",
@@ -123,7 +123,7 @@
       ]
     },
     {
-      "day": 22,
+      "day": 29,
       "dishes": [
         "Arròs amb sofregit de calçots",
         "Salmó amb salsa de poma"
