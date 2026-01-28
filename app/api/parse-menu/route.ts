@@ -10,6 +10,11 @@ export async function POST(request: NextRequest) {
     const year = parseInt(formData.get("year") as string, 10);
     const month = parseInt(formData.get("month") as string, 10);
     const startDay = parseInt(formData.get("startDay") as string, 10) || 1;
+    const singleDishDaysStr = formData.get("singleDishDays") as string || "";
+    const singleDishDays = singleDishDaysStr
+      .split(",")
+      .map((s) => parseInt(s.trim(), 10))
+      .filter((n) => !isNaN(n));
     const save = formData.get("save") === "true";
 
     if (!file) {
@@ -34,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await parsePdfBuffer(buffer, year, month, startDay);
+    const result = await parsePdfBuffer(buffer, year, month, startDay, singleDishDays);
 
     if (!result.success || !result.menus) {
       return NextResponse.json(

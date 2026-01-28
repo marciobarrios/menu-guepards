@@ -101,27 +101,39 @@ function groupLunchDishesIntoDays(dishes: string[]): string[][] {
   return days;
 }
 
-function groupDinnerDishesIntoDays(dishes: string[]): string[][] {
-  // Dinner menus have 2 dishes per day, EXCEPT when a dish contains "plat únic"
-  // which means it's a single-dish day
+function groupDinnerDishesIntoDays(
+  dishes: string[],
+  weekdays: number[],
+  singleDishDays: number[]
+): string[][] {
+  // Dinner menus have 2 dishes per day, EXCEPT:
+  // 1. When a dish contains "plat únic"
+  // 2. When the day is in singleDishDays array
   const days: string[][] = [];
-  let i = 0;
+  let dishIndex = 0;
+  let dayIndex = 0;
 
-  while (i < dishes.length) {
-    const dish = dishes[i];
+  while (dishIndex < dishes.length && dayIndex < weekdays.length) {
+    const currentDay = weekdays[dayIndex];
+    const dish = dishes[dishIndex];
 
-    // Check if this is a "plat únic" (single dish day)
-    if (dish.toLowerCase().includes("plat únic")) {
+    // Check if this is a single-dish day (either marked "plat únic" or in singleDishDays)
+    const isMarkedPlatUnic = dish.toLowerCase().includes("plat únic");
+    const isInSingleDishDays = singleDishDays.includes(currentDay);
+
+    if (isMarkedPlatUnic || isInSingleDishDays) {
+      // Single dish day
       days.push([dish]);
-      i += 1;
+      dishIndex += 1;
     } else {
       // Normal 2-dish day
-      const dayDishes = dishes.slice(i, i + 2);
+      const dayDishes = dishes.slice(dishIndex, dishIndex + 2);
       if (dayDishes.length > 0) {
         days.push(dayDishes);
       }
-      i += 2;
+      dishIndex += 2;
     }
+    dayIndex += 1;
   }
 
   return days;
@@ -131,7 +143,8 @@ export async function parsePdfBuffer(
   buffer: Buffer,
   year: number,
   month: number,
-  startDay: number = 1
+  startDay: number = 1,
+  singleDishDays: number[] = []
 ): Promise<ParsedMenuResult> {
   try {
     // Dynamic import of pdf-parse
@@ -153,13 +166,13 @@ export async function parsePdfBuffer(
       };
     }
 
+    // Get weekdays in the month starting from startDay
+    const weekdays = getWeekdaysInMonth(year, month, startDay);
+
     // Group dishes into days based on type
     const daysOfDishes = hasDashes
       ? groupLunchDishesIntoDays(dishes)
-      : groupDinnerDishesIntoDays(dishes);
-
-    // Get weekdays in the month starting from startDay
-    const weekdays = getWeekdaysInMonth(year, month, startDay);
+      : groupDinnerDishesIntoDays(dishes, weekdays, singleDishDays);
 
     if (daysOfDishes.length > weekdays.length) {
       console.warn(

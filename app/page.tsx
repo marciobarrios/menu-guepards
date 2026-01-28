@@ -34,6 +34,7 @@ export default function Home() {
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [startDay, setStartDay] = useState(1);
+  const [singleDishDays, setSingleDishDays] = useState("");
 
   const [lunchFile, setLunchFile] = useState<File | null>(null);
   const [dinnerFile, setDinnerFile] = useState<File | null>(null);
@@ -74,6 +75,7 @@ export default function Home() {
     formData.append("year", selectedYear.toString());
     formData.append("month", selectedMonth.toString());
     formData.append("startDay", startDay.toString());
+    formData.append("singleDishDays", singleDishDays);
     formData.append("save", "false");
 
     try {
@@ -113,6 +115,7 @@ export default function Home() {
     formData.append("year", selectedYear.toString());
     formData.append("month", selectedMonth.toString());
     formData.append("startDay", startDay.toString());
+    formData.append("singleDishDays", singleDishDays);
     formData.append("save", "true");
 
     try {
@@ -234,9 +237,19 @@ export default function Home() {
               className="border rounded-lg px-4 py-2 text-gray-700 w-20"
             />
           </div>
+          <div>
+            <label className="block text-sm text-gray-600 mb-1">Dies plat únic (sopars)</label>
+            <input
+              type="text"
+              placeholder="ex: 15, 23, 30"
+              value={singleDishDays}
+              onChange={(e) => setSingleDishDays(e.target.value)}
+              className="border rounded-lg px-4 py-2 text-gray-700 w-32"
+            />
+          </div>
         </div>
         <p className="text-sm text-gray-500 mt-2">
-          Indica el primer dia del mes que té menú (ex: 8 si els dies 1-7 són festius)
+          Primer dia: indica quan comença el menú. Dies plat únic: dies amb un sol plat al sopar.
         </p>
       </section>
 
