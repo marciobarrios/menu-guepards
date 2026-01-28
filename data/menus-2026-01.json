@@ -130,5 +130,117 @@
       ]
     }
   ],
-  "dinner": []
+  "dinner": [
+    {
+      "day": 8,
+      "dishes": [
+        "Crema de pastanaga i moniato",
+        "Lluç enfarinat al forn"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Amanida d'espinacs baby, mandarina i tomàquets secs",
+        "Lasanya de vedella amb beixamel"
+      ]
+    },
+    {
+      "day": 12,
+      "dishes": [
+        "Coliflor gratinada al forn",
+        "Truita francesa i pa amb tomàquet"
+      ]
+    },
+    {
+      "day": 13,
+      "dishes": [
+        "Macarrons amb tomàquet",
+        "Pollastre al forn amb ceba i pastanaga"
+      ]
+    },
+    {
+      "day": 14,
+      "dishes": [
+        "Amanida de rúcula amb pastanaga ratllada",
+        "Estofat de patates i verat"
+      ]
+    },
+    {
+      "day": 15,
+      "dishes": [
+        "Arròs melós amb verdures i pollastre com a plat únic",
+        "Guacamole amb bastonets de pastanaga"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Pizza casolana",
+        "Espinacs a la catalana"
+      ]
+    },
+    {
+      "day": 19,
+      "dishes": [
+        "Bacallà al forn amb patates",
+        "Amanida de canonges, taronja i olives"
+      ]
+    },
+    {
+      "day": 20,
+      "dishes": [
+        "Guisat de llenties amb verdures",
+        "Bròquil al vapor amb oli d'oliva"
+      ]
+    },
+    {
+      "day": 21,
+      "dishes": [
+        "Hamburguesa de vedella amb patates fregides",
+        "Crema de carbassa"
+      ]
+    },
+    {
+      "day": 22,
+      "dishes": [
+        "Cuixa de pollastre al forn amb enciam i remolatxa ratllada",
+        "Curry de cigrons amb llet de coco i verduretes"
+      ]
+    },
+    {
+      "day": 23,
+      "dishes": [
+        "Amanida verda variada amb viangreta de mel i mostassa",
+        "Hamburgueses de salmó i formatge feta amb xips de boniato al forn"
+      ]
+    },
+    {
+      "day": 26,
+      "dishes": [
+        "Crema de col lombarda, patata i poma",
+        "Truita de calçots"
+      ]
+    },
+    {
+      "day": 27,
+      "dishes": [
+        "Estofat de llenties amb xoriço",
+        "Pollastre a la planxa amb enciam i ravanets encurtits"
+      ]
+    },
+    {
+      "day": 28,
+      "dishes": [
+        "Hummus de cigrons amb crudités",
+        "Gall dindi al forn amb ceba caramelitzada"
+      ]
+    },
+    {
+      "day": 29,
+      "dishes": [
+        "Quiche d'espinacs i formatge"
+      ]
+    }
+  ]
 }
