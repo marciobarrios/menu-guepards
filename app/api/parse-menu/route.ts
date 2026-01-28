@@ -44,10 +44,16 @@ export async function POST(request: NextRequest) {
 
     // Save if requested
     if (save) {
-      if (type === "lunch") {
-        await updateLunchMenus(year, month, result.menus);
-      } else {
-        await updateDinnerMenus(year, month, result.menus);
+      const saveResult = type === "lunch"
+        ? await updateLunchMenus(year, month, result.menus)
+        : await updateDinnerMenus(year, month, result.menus);
+
+      if (!saveResult.success) {
+        return NextResponse.json({
+          success: false,
+          error: "Error guardant a GitHub. Comprova el GITHUB_TOKEN.",
+          menus: result.menus,
+        }, { status: 500 });
       }
     }
 

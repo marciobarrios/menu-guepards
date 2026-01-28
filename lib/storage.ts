@@ -1,32 +1,33 @@
-import { promises as fs } from "fs";
-import path from "path";
 import { MonthMenus, DailyMenu } from "./types";
+import { getFileFromGitHub, saveFileToGitHub } from "./github";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const CATALAN_MONTHS = [
+  "gener", "febrer", "març", "abril", "maig", "juny",
+  "juliol", "agost", "setembre", "octubre", "novembre", "desembre",
+];
 
 function getFilePath(year: number, month: number): string {
-  return path.join(DATA_DIR, `menus-${year}-${String(month).padStart(2, "0")}.json`);
+  return `data/menus-${year}-${String(month).padStart(2, "0")}.json`;
 }
 
-export async function ensureDataDir(): Promise<void> {
-  try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-  } catch {
-    // Directory already exists
-  }
-}
-
-export async function saveMenus(menus: MonthMenus): Promise<void> {
-  await ensureDataDir();
+export async function saveMenus(menus: MonthMenus): Promise<boolean> {
   const filePath = getFilePath(menus.year, menus.month);
-  await fs.writeFile(filePath, JSON.stringify(menus, null, 2), "utf-8");
+  const monthName = CATALAN_MONTHS[menus.month - 1];
+  const message = `Update menus for ${monthName} ${menus.year}`;
+
+  return saveFileToGitHub(filePath, JSON.stringify(menus, null, 2), message);
 }
 
 export async function loadMenus(year: number, month: number): Promise<MonthMenus | null> {
   const filePath = getFilePath(year, month);
+  const file = await getFileFromGitHub(filePath);
+
+  if (!file) {
+    return null;
+  }
+
   try {
-    const data = await fs.readFile(filePath, "utf-8");
-    return JSON.parse(data) as MonthMenus;
+    return JSON.parse(file.content) as MonthMenus;
   } catch {
     return null;
   }
@@ -36,24 +37,26 @@ export async function updateLunchMenus(
   year: number,
   month: number,
   lunch: DailyMenu[]
-): Promise<MonthMenus> {
+): Promise<{ success: boolean; menus?: MonthMenus }> {
   const existing = await loadMenus(year, month);
   const menus: MonthMenus = existing || { year, month, lunch: [], dinner: [] };
   menus.lunch = lunch;
-  await saveMenus(menus);
-  return menus;
+
+  const success = await saveMenus(menus);
+  return { success, menus: success ? menus : undefined };
 }
 
 export async function updateDinnerMenus(
   year: number,
   month: number,
   dinner: DailyMenu[]
-): Promise<MonthMenus> {
+): Promise<{ success: boolean; menus?: MonthMenus }> {
   const existing = await loadMenus(year, month);
   const menus: MonthMenus = existing || { year, month, lunch: [], dinner: [] };
   menus.dinner = dinner;
-  await saveMenus(menus);
-  return menus;
+
+  const success = await saveMenus(menus);
+  return { success, menus: success ? menus : undefined };
 }
 
 export async function getTodayMenus(): Promise<{
@@ -80,22 +83,18 @@ export async function getTodayMenus(): Promise<{
 }
 
 export async function listAvailableMonths(): Promise<{ year: number; month: number }[]> {
-  await ensureDataDir();
-  const files = await fs.readdir(DATA_DIR);
+  // For now, return current and surrounding months
+  // A full implementation would list files from GitHub, but that's more complex
+  const now = new Date();
   const months: { year: number; month: number }[] = [];
 
-  for (const file of files) {
-    const match = file.match(/^menus-(\d{4})-(\d{2})\.json$/);
-    if (match) {
-      months.push({
-        year: parseInt(match[1], 10),
-        month: parseInt(match[2], 10),
-      });
-    }
+  for (let offset = -2; offset <= 2; offset++) {
+    const date = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    months.push({
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+    });
   }
 
-  return months.sort((a, b) => {
-    if (a.year !== b.year) return b.year - a.year;
-    return b.month - a.month;
-  });
+  return months;
 }
