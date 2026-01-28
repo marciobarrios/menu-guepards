@@ -249,7 +249,7 @@ export default function Home() {
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* Lunch Upload */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+          <div className={`border-2 border-dashed rounded-lg p-4 ${lunchPreview ? 'border-amber-400 bg-amber-50' : 'border-gray-300'}`}>
             <h3 className="font-medium mb-2">Menú de Dinar</h3>
             <input
               type="file"
@@ -260,13 +260,14 @@ export default function Home() {
             />
             {lunchPreview && (
               <div className="mt-4">
-                <p className="text-sm text-green-600 mb-2">
-                  {lunchPreview.length} dies trobats
-                </p>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm text-green-600">{lunchPreview.length} dies trobats</span>
+                  <span className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded font-medium">PENDENT DE GUARDAR</span>
+                </div>
                 <button
                   onClick={() => saveMenus("lunch")}
                   disabled={loading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                  className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 w-full"
                 >
                   Guardar menús de dinar
                 </button>
@@ -275,7 +276,7 @@ export default function Home() {
           </div>
 
           {/* Dinner Upload */}
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+          <div className={`border-2 border-dashed rounded-lg p-4 ${dinnerPreview ? 'border-amber-400 bg-amber-50' : 'border-gray-300'}`}>
             <h3 className="font-medium mb-2">Proposta de Sopar</h3>
             <input
               type="file"
@@ -286,13 +287,14 @@ export default function Home() {
             />
             {dinnerPreview && (
               <div className="mt-4">
-                <p className="text-sm text-green-600 mb-2">
-                  {dinnerPreview.length} dies trobats
-                </p>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm text-green-600">{dinnerPreview.length} dies trobats</span>
+                  <span className="text-xs bg-amber-200 text-amber-800 px-2 py-1 rounded font-medium">PENDENT DE GUARDAR</span>
+                </div>
                 <button
                   onClick={() => saveMenus("dinner")}
                   disabled={loading}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+                  className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 w-full"
                 >
                   Guardar propostes de sopar
                 </button>
@@ -304,8 +306,11 @@ export default function Home() {
 
       {/* Preview Section */}
       {(lunchPreview || dinnerPreview) && (
-        <section className="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Vista prèvia</h2>
+        <section className="bg-amber-50 border-2 border-amber-300 rounded-lg shadow p-6 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xl font-semibold">Vista prèvia</h2>
+            <span className="text-sm bg-amber-200 text-amber-800 px-2 py-1 rounded font-medium">No guardat - comprova i guarda</span>
+          </div>
           <div className="grid md:grid-cols-2 gap-6">
             {lunchPreview && (
               <div>
