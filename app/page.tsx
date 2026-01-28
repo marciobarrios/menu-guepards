@@ -369,7 +369,7 @@ export default function Home() {
       <section className="bg-white rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Enviar menú d'avui</h2>
         <p className="text-gray-600 mb-4">
-          Envia el menú del dia actual via WhatsApp (CallMeBot).
+          Envia el menú del dia actual via Telegram.
         </p>
         <button
           onClick={sendNow}

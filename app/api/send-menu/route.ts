@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTodayMenus } from "@/lib/storage";
-import { sendWhatsAppMessage, formatMenuMessage, CATALAN_MONTHS } from "@/lib/callmebot";
+import { sendTelegramMessage, formatMenuMessage, CATALAN_MONTHS } from "@/lib/telegram";
 
 export async function GET(request: NextRequest) {
   // Verify cron secret for Vercel cron jobs
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       monthName
     );
 
-    const result = await sendWhatsAppMessage(message);
+    const result = await sendTelegramMessage(message);
 
     return NextResponse.json({
       success: result.success,
@@ -82,7 +82,7 @@ export async function POST() {
       monthName
     );
 
-    const result = await sendWhatsAppMessage(message);
+    const result = await sendTelegramMessage(message);
 
     return NextResponse.json({
       success: result.success,

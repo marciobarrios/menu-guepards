@@ -1,24 +1,34 @@
 import { SendResult } from "./types";
 
-export async function sendWhatsAppMessage(message: string): Promise<SendResult> {
-  const phone = process.env.PHONE;
-  const apiKey = process.env.CALLMEBOT_KEY;
+export async function sendTelegramMessage(message: string): Promise<SendResult> {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
 
-  if (!phone || !apiKey) {
+  if (!botToken || !chatId) {
     return {
       success: false,
-      error: "Missing PHONE or CALLMEBOT_KEY environment variables",
+      error: "Missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID environment variables",
     };
   }
 
-  const encodedMessage = encodeURIComponent(message);
-  const url = `https://api.callmebot.com/whatsapp.php?phone=${phone}&text=${encodedMessage}&apikey=${apiKey}`;
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
 
   try {
-    const response = await fetch(url);
-    const text = await response.text();
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "Markdown",
+      }),
+    });
 
-    if (response.ok && text.includes("Message queued")) {
+    const data = await response.json();
+
+    if (data.ok) {
       return {
         success: true,
         message: "Message sent successfully",
@@ -27,7 +37,7 @@ export async function sendWhatsAppMessage(message: string): Promise<SendResult> 
 
     return {
       success: false,
-      error: `CallMeBot error: ${text}`,
+      error: `Telegram error: ${data.description || "Unknown error"}`,
     };
   } catch (error) {
     return {
@@ -49,12 +59,12 @@ export function formatMenuMessage(
 
   if (lunchDishes && lunchDishes.length > 0) {
     message += `\n🍱 *Menú del dia:*\n`;
-    message += lunchDishes.map((d) => `- ${d}`).join("\n");
+    message += lunchDishes.map((d) => `• ${d}`).join("\n");
   }
 
   if (dinnerDishes && dinnerDishes.length > 0) {
     message += `\n\n🥣 *Proposta de sopar:*\n`;
-    message += dinnerDishes.map((d) => `- ${d}`).join("\n");
+    message += dinnerDishes.map((d) => `• ${d}`).join("\n");
   }
 
   if (!lunchDishes && !dinnerDishes) {
