@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/auto-fetch-menu",
+      "schedule": "0 8 1-7 * *"
+    },
+    {
       "path": "/api/send-menu",
       "schedule": "0 10 * * 1-5"
     }
