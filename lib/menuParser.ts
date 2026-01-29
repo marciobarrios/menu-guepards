@@ -23,22 +23,32 @@ function extractDishesWithDashes(text: string): string[] {
 
   return parts
     .map((p) => {
+      // First, take only the lines that are actual dish content
+      // Stop at footer markers or email addresses
+      const lines = p.split(/\n/);
+      const dishLines: string[] = [];
+      for (const line of lines) {
+        const trimmed = line.trim();
+        // Stop if we hit footer content
+        if (trimmed.includes("@")) break;
+        if (trimmed.includes("ESCOLA")) break;
+        if (trimmed.includes("BASAL")) break;
+        if (trimmed.includes("GASTRONOMIA")) break;
+        if (/^\d{3}/.test(trimmed)) break;
+        dishLines.push(trimmed);
+      }
+
       // Clean up the dish text
-      return p
+      return dishLines
+        .join(" ")
         .replace(/\(\d+(,\s*\d+)*\)/g, "") // Remove allergen numbers like (1, 2, 3)
-        .replace(/\n/g, " ")
         .replace(/\s{2,}/g, " ")
         .trim();
     })
     .filter((p) => {
-      // Filter out empty strings and non-dish content
+      // Filter out empty strings and very short content
       if (!p) return false;
       if (p.length < 5) return false;
-      if (p.includes("@")) return false;
-      if (p.includes("ESCOLA")) return false;
-      if (p.includes("BASAL")) return false;
-      if (p.includes("GASTRONOMIA")) return false;
-      if (/^\d{3}/.test(p)) return false;
       return true;
     });
 }
