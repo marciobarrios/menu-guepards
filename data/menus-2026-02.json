@@ -1,0 +1,139 @@
+{
+  "year": 2026,
+  "month": 2,
+  "lunch": [],
+  "dinner": [
+    {
+      "day": 2,
+      "dishes": [
+        "Espaguetis a la napolitana",
+        "Remenat d'espàrrecs, alls tendres i gambetes"
+      ]
+    },
+    {
+      "day": 3,
+      "dishes": [
+        "Amanida d'endívies, olives i tomàquets secs",
+        "Estofat de patata i sípia"
+      ]
+    },
+    {
+      "day": 4,
+      "dishes": [
+        "Crema de pastanaga, nap, ceba i xirivía",
+        "Pollastre arrebossat al forn amb col riçada"
+      ]
+    },
+    {
+      "day": 5,
+      "dishes": [
+        "Amanida d'espinacs baby, mandarina i vinagreta de mel i mostassa",
+        "Risotto de carbassa amb parmesà"
+      ]
+    },
+    {
+      "day": 6,
+      "dishes": [
+        "Arròs integral amb verduretes",
+        "Guisat de pollastre amb ceba, cúrcuma i brou de verdures"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Amanida de fulla verda amb taronja i fruits secs",
+        "Estofat de llenties i xoriço"
+      ]
+    },
+    {
+      "day": 10,
+      "dishes": [
+        "Flors de carxofa amb pernil",
+        "Truita de patata amb amanida de rúcula"
+      ]
+    },
+    {
+      "day": 11,
+      "dishes": [
+        "Quiche de verdures (espàrrecs, carbassa, ceba, porro...) ous, crema de llet, mantega i formatge com a plat únic"
+      ]
+    },
+    {
+      "day": 12,
+      "dishes": [
+        "Crema de carbassa",
+        "Sardines al forn amb julivert, orenga, llimona, tomàquets cherri i oli d'oliva"
+      ]
+    },
+    {
+      "day": 13,
+      "dishes": [
+        "Amanida xató",
+        "Truita de ceba i boniato"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Espinacs a la catalana",
+        "Pollastre al forn amb patates"
+      ]
+    },
+    {
+      "day": 17,
+      "dishes": [
+        "Coca de recapte",
+        "Truita d'alls tendres i mongetes blanques baby"
+      ]
+    },
+    {
+      "day": 18,
+      "dishes": [
+        "Crema de porros i pera",
+        "Gall dindi al forn amb ceba i pastanaga"
+      ]
+    },
+    {
+      "day": 19,
+      "dishes": [
+        "Pa nan casolà",
+        "Curry indi de llenties amb verduretes"
+      ]
+    },
+    {
+      "day": 20,
+      "dishes": [
+        "Crema de col lombarda, patata i poma i ou dur ratllat",
+        "Canelons d'espinacs"
+      ]
+    },
+    {
+      "day": 23,
+      "dishes": [
+        "Mongeta verda amb patata i cigons",
+        "Lluç enfarinat al forn"
+      ]
+    },
+    {
+      "day": 24,
+      "dishes": [
+        "Amanida de fulla de roure amb pastanaga ratllada i vinagreta",
+        "Cigrons estofats amb pollastre"
+      ]
+    },
+    {
+      "day": 25,
+      "dishes": [
+        "Amanida d'espinacs baby i rúcula amb poma i vinagreta",
+        "Hamburguesa de vedella amb patates fregides"
+      ]
+    },
+    {
+      "day": 26,
+      "dishes": [
+        "Trinxat de la cerdanya amb col patata i cansalada",
+        "Pollastre a la planxa amb ceba caramelitzada"
+      ]
+    }
+  ]
+}
