@@ -18,10 +18,15 @@ function getWeekdaysInMonth(year: number, month: number, startDay: number = 1): 
 }
 
 function extractDishesWithDashes(text: string): string[] {
-  // Split by dash markers at line start
-  const parts = text.split(/^-\s*/m);
+  // Truncate at "GASTRONOMIA" section (monthly special, not regular daily menu)
+  const gastronomiaIndex = text.indexOf("GASTRONOMIA");
+  const cleanText = gastronomiaIndex >= 0 ? text.substring(0, gastronomiaIndex) : text;
 
-  return parts
+  // Split by dash markers at line start
+  const parts = cleanText.split(/^-\s*/m);
+
+  // Skip parts[0] (pre-first-dash header content)
+  return parts.slice(1)
     .map((p) => {
       // First, take only the lines that are actual dish content
       // Stop at footer markers or email addresses
@@ -98,7 +103,7 @@ function extractDishesFromLines(text: string): string[] {
   return dishes.filter((d) => d.length >= 5);
 }
 
-function groupLunchDishesIntoDays(dishes: string[]): string[][] {
+function groupLunchDishesIntoDays(dishes: string[], expectedDays: number): string[][] {
   const days: string[][] = [];
 
   for (let i = 0; i < dishes.length; i += LUNCH_DISHES_PER_DAY) {
@@ -106,6 +111,12 @@ function groupLunchDishesIntoDays(dishes: string[]): string[][] {
     if (dayDishes.length > 0) {
       days.push(dayDishes);
     }
+  }
+
+  if (days.length !== expectedDays) {
+    console.warn(
+      `Lunch grouping mismatch: ${days.length} groups from ${dishes.length} dishes, expected ${expectedDays} weekdays`
+    );
   }
 
   return days;
@@ -181,7 +192,7 @@ export async function parsePdfBuffer(
 
     // Group dishes into days based on type
     const daysOfDishes = hasDashes
-      ? groupLunchDishesIntoDays(dishes)
+      ? groupLunchDishesIntoDays(dishes, weekdays.length)
       : groupDinnerDishesIntoDays(dishes, weekdays, singleDishDays);
 
     if (daysOfDishes.length > weekdays.length) {
