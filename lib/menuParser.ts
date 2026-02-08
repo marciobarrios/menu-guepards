@@ -1,163 +1,265 @@
 import { DailyMenu, ParsedMenuResult } from "./types";
 
-const LUNCH_DISHES_PER_DAY = 3;
+interface TextItem {
+  str: string;
+  x: number;
+  y: number;
+}
 
-function getWeekdaysInMonth(year: number, month: number, startDay: number = 1): number[] {
-  const weekdays: number[] = [];
-  const daysInMonth = new Date(year, month, 0).getDate();
+// Non-dish content markers
+const SKIP_MARKERS = ["@", "ESCOLA", "MARTORELL", "BASAL", "SOPARS", "GASTRONOMIA", "FESTIU"];
 
-  for (let day = startDay; day <= daysInMonth; day++) {
-    const date = new Date(year, month - 1, day);
-    const dayOfWeek = date.getDay(); // 0 = Sunday, 6 = Saturday
-    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-      weekdays.push(day);
+/**
+ * Find the first Monday of the month at or after startDay.
+ */
+function getFirstMonday(year: number, month: number, startDay: number): number {
+  for (let d = startDay; d <= startDay + 7; d++) {
+    const date = new Date(year, month - 1, d);
+    if (date.getDay() === 1) return d;
+  }
+  return startDay;
+}
+
+/**
+ * Cluster sorted numeric values into groups separated by gaps > threshold.
+ */
+function clusterValues(values: number[], gapThreshold: number): number[][] {
+  if (values.length === 0) return [];
+  const sorted = Array.from(new Set(values)).sort((a, b) => a - b);
+  const clusters: number[][] = [[sorted[0]]];
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] - sorted[i - 1] > gapThreshold) {
+      clusters.push([sorted[i]]);
+    } else {
+      clusters[clusters.length - 1].push(sorted[i]);
     }
   }
-
-  return weekdays;
+  return clusters;
 }
 
-function extractDishesWithDashes(text: string): string[] {
-  // Truncate at "GASTRONOMIA" section (monthly special, not regular daily menu)
-  const gastronomiaIndex = text.indexOf("GASTRONOMIA");
-  const cleanText = gastronomiaIndex >= 0 ? text.substring(0, gastronomiaIndex) : text;
+/**
+ * Assign a value to a column using left-edge boundaries.
+ * colLeftEdges must be sorted ascending.
+ */
+function assignToColumn(x: number, colLeftEdges: number[]): number {
+  for (let i = colLeftEdges.length - 1; i >= 0; i--) {
+    if (x >= colLeftEdges[i]) return i;
+  }
+  return 0;
+}
 
-  // Split by dash markers at line start
-  const parts = cleanText.split(/^-\s*/m);
+/**
+ * Assign a value to a row using boundary midpoints.
+ * rowBoundaries[i] is the lower Y threshold for row i (PDF: higher Y = top).
+ * Must be sorted descending (highest threshold first).
+ */
+function assignToRow(y: number, rowBoundaries: number[]): number {
+  for (let i = 0; i < rowBoundaries.length; i++) {
+    if (y >= rowBoundaries[i]) return i;
+  }
+  return rowBoundaries.length; // Last row (below all boundaries)
+}
 
-  // Skip parts[0] (pre-first-dash header content)
-  return parts.slice(1)
-    .map((p) => {
-      // First, take only the lines that are actual dish content
-      // Stop at footer markers or email addresses
-      const lines = p.split(/\n/);
-      const dishLines: string[] = [];
-      for (const line of lines) {
-        const trimmed = line.trim();
-        // Stop if we hit footer content
-        if (trimmed.includes("@")) break;
-        if (trimmed.includes("ESCOLA")) break;
-        if (trimmed.includes("BASAL")) break;
-        if (trimmed.includes("GASTRONOMIA")) break;
-        if (/^\d{3}/.test(trimmed)) break;
-        dishLines.push(trimmed);
+/**
+ * Extract text items with (x, y) positions from a PDF buffer.
+ */
+async function extractTextItems(buffer: Buffer): Promise<{ items: TextItem[]; rawText: string }> {
+  const pdfParse = (await import("pdf-parse")).default;
+  const items: TextItem[] = [];
+  let rawText = "";
+
+  function customRender(pageData: any) {
+    return pageData.getTextContent().then((textContent: any) => {
+      let lastY: number | undefined;
+      let text = "";
+      for (const item of textContent.items) {
+        if (item.str && item.str.trim()) {
+          items.push({
+            str: item.str,
+            x: Math.round(item.transform[4]),
+            y: Math.round(item.transform[5]),
+          });
+        }
+        // Reproduce default text concatenation for format detection
+        if (lastY === item.transform[5] || lastY === undefined) {
+          text += item.str;
+        } else {
+          text += "\n" + item.str;
+        }
+        lastY = item.transform[5];
       }
-
-      // Clean up the dish text
-      return dishLines
-        .join(" ")
-        .replace(/\(\d+(,\s*\d+)*\)/g, "") // Remove allergen numbers like (1, 2, 3)
-        .replace(/\s{2,}/g, " ")
-        .trim();
-    })
-    .filter((p) => {
-      // Filter out empty strings and very short content
-      if (!p) return false;
-      if (p.length < 5) return false;
-      return true;
+      rawText = text;
+      return text;
     });
+  }
+
+  await (pdfParse as any)(buffer, { pagerender: customRender });
+  return { items, rawText };
 }
 
-function extractDishesFromLines(text: string): string[] {
-  // For dinner menus without dashes, we need to be smarter about line joining
-  // Each dish typically starts with a capital letter and ends when the next dish starts
-  const lines = text
-    .split(/\n/)
-    .map((l) => l.trim())
-    .filter((l) => {
-      if (!l) return false;
-      if (l.includes("@")) return false;
-      if (l.includes("ESCOLA")) return false;
-      if (l.includes("BASAL")) return false;
-      if (l.includes("SOPARS")) return false;
-      if (l.includes("GASTRONOMIA")) return false;
-      if (/^\d{3}/.test(l)) return false;
-      return true;
-    });
+/**
+ * Clean a dish string: remove allergen numbers, extra whitespace.
+ */
+function cleanDish(text: string): string {
+  return text
+    .replace(/\(\d+(,\s*\d+)*\)/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 
+/**
+ * Convert a cell's text items into lines (joining items at the same Y).
+ */
+function itemsToLines(cellItems: TextItem[]): string[] {
+  const sorted = [...cellItems].sort((a, b) => b.y - a.y || a.x - b.x);
+  const lines: string[] = [];
+  let currentY: number | null = null;
+  for (const item of sorted) {
+    if (currentY === null || Math.abs(item.y - currentY) > 3) {
+      lines.push(item.str);
+      currentY = item.y;
+    } else {
+      lines[lines.length - 1] += item.str;
+    }
+  }
+  return lines;
+}
+
+/**
+ * Extract dishes from a cell's text items using dash markers (lunch format).
+ */
+function extractLunchDishesFromCell(cellItems: TextItem[]): string[] {
+  const text = itemsToLines(cellItems).join("\n");
+  const parts = text.split(/^-\s*/m).slice(1); // Skip pre-first-dash content
+  return parts
+    .map((p) => cleanDish(p.replace(/\n/g, " ")))
+    .filter((p) => p.length >= 5);
+}
+
+/**
+ * Extract dishes from a cell's text items using capital-letter detection (dinner format).
+ */
+function extractDinnerDishesFromCell(cellItems: TextItem[]): string[] {
+  const lines = itemsToLines(cellItems);
   const dishes: string[] = [];
   let currentDish = "";
 
   for (const line of lines) {
-    // Check if this line starts a new dish (starts with capital letter after a previous dish)
-    const startsWithCapital = /^[A-ZÀÈÉÍÒÓÚÇ]/.test(line);
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const startsWithCapital = /^[A-ZÀÈÉÍÒÓÚÇ]/.test(trimmed);
 
     if (currentDish && startsWithCapital) {
-      // Save the previous dish and start a new one
-      dishes.push(currentDish.trim());
-      currentDish = line;
+      dishes.push(cleanDish(currentDish));
+      currentDish = trimmed;
     } else if (currentDish) {
-      // Continue the current dish
-      currentDish += " " + line;
+      currentDish += " " + trimmed;
     } else {
-      // Start the first dish
-      currentDish = line;
+      currentDish = trimmed;
     }
   }
-
-  // Don't forget the last dish
   if (currentDish) {
-    dishes.push(currentDish.trim());
+    dishes.push(cleanDish(currentDish));
   }
 
   return dishes.filter((d) => d.length >= 5);
 }
 
-function groupLunchDishesIntoDays(dishes: string[], expectedDays: number): string[][] {
-  const days: string[][] = [];
-
-  for (let i = 0; i < dishes.length; i += LUNCH_DISHES_PER_DAY) {
-    const dayDishes = dishes.slice(i, i + LUNCH_DISHES_PER_DAY);
-    if (dayDishes.length > 0) {
-      days.push(dayDishes);
-    }
-  }
-
-  if (days.length !== expectedDays) {
-    console.warn(
-      `Lunch grouping mismatch: ${days.length} groups from ${dishes.length} dishes, expected ${expectedDays} weekdays`
-    );
-  }
-
-  return days;
+/**
+ * Filter items to only those that are anchor points for grid detection.
+ * For lunch: dash-prefixed items. For dinner: capital-letter items.
+ * These reliably sit at the left edge of their grid cell.
+ */
+function getAnchorItems(items: TextItem[], isLunch: boolean): TextItem[] {
+  return items.filter((item) => {
+    const s = item.str.trimStart();
+    // Skip non-content
+    if (SKIP_MARKERS.some((m) => s.includes(m))) return false;
+    if (/^\d{3}\s/.test(s)) return false;
+    // Anchor detection
+    if (isLunch) return s.startsWith("-");
+    return /^[A-ZÀÈÉÍÒÓÚÇ]/.test(s);
+  });
 }
 
-function groupDinnerDishesIntoDays(
-  dishes: string[],
-  weekdays: number[],
-  singleDishDays: number[]
-): string[][] {
-  // Dinner menus have 2 dishes per day, EXCEPT:
-  // 1. When a dish contains "plat únic"
-  // 2. When the day is in singleDishDays array
-  const days: string[][] = [];
-  let dishIndex = 0;
-  let dayIndex = 0;
+/**
+ * Parse a PDF menu using position-based grid extraction.
+ */
+function parseGrid(
+  items: TextItem[],
+  year: number,
+  month: number,
+  isLunch: boolean
+): DailyMenu[] {
+  // Use anchor items (dish starts) for reliable column/row detection
+  const anchorItems = getAnchorItems(items, isLunch);
+  if (anchorItems.length === 0) return [];
 
-  while (dishIndex < dishes.length && dayIndex < weekdays.length) {
-    const currentDay = weekdays[dayIndex];
-    const dish = dishes[dishIndex];
+  // Detect 5 weekday columns from anchor X positions
+  const xClusters = clusterValues(anchorItems.map((i) => i.x), 60);
+  if (xClusters.length < 5) {
+    console.warn(`Expected ≥5 column clusters, found ${xClusters.length}`);
+    return [];
+  }
+  // Take the 5 rightmost clusters (skip any sidebar noise)
+  const colClusters = xClusters.slice(-5);
+  // Column left edges: items with x >= colLeftEdges[i] belong to column i
+  const colLeftEdges = colClusters.map((c) => Math.min(...c));
 
-    // Check if this is a single-dish day (either marked "plat únic" or in singleDishDays)
-    const isMarkedPlatUnic = dish.toLowerCase().includes("plat únic");
-    const isInSingleDishDays = singleDishDays.includes(currentDay);
-
-    if (isMarkedPlatUnic || isInSingleDishDays) {
-      // Single dish day
-      days.push([dish]);
-      dishIndex += 1;
-    } else {
-      // Normal 2-dish day
-      const dayDishes = dishes.slice(dishIndex, dishIndex + 2);
-      if (dayDishes.length > 0) {
-        days.push(dayDishes);
-      }
-      dishIndex += 2;
-    }
-    dayIndex += 1;
+  // Detect week rows from anchor Y positions
+  const yClusters = clusterValues(anchorItems.map((i) => i.y), 40);
+  // Reverse for top-to-bottom order (PDF Y axis: higher Y = top)
+  const rowClusters = [...yClusters].reverse();
+  // Row boundaries: midpoint between bottom of row[i] and top of row[i+1]
+  // Items with Y >= boundary[i] go to row i (checked in order)
+  const rowBoundaries: number[] = [];
+  for (let i = 0; i < rowClusters.length - 1; i++) {
+    const thisMin = Math.min(...rowClusters[i]);
+    const nextMax = Math.max(...rowClusters[i + 1]);
+    rowBoundaries.push(Math.round((thisMin + nextMax) / 2));
   }
 
-  return days;
+  // Filter all items to exclude non-content, then assign to grid cells
+  const contentItems = items.filter((item) => {
+    const s = item.str.trim();
+    return !SKIP_MARKERS.some((m) => s.includes(m)) && !/^\d{3}\s/.test(s);
+  });
+
+  const grid: Map<string, TextItem[]> = new Map();
+  for (const item of contentItems) {
+    const col = assignToColumn(item.x, colLeftEdges);
+    const row = assignToRow(item.y, rowBoundaries);
+    const key = `${row},${col}`;
+    if (!grid.has(key)) grid.set(key, []);
+    grid.get(key)!.push(item);
+  }
+
+  // Map grid positions to calendar days
+  const firstMonday = getFirstMonday(year, month, 1);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const menus: DailyMenu[] = [];
+
+  for (const [key, cellItems] of Array.from(grid.entries())) {
+    const [row, col] = key.split(",").map(Number);
+    const day = firstMonday + row * 7 + col;
+
+    if (day < 1 || day > daysInMonth) continue;
+
+    // Skip holiday cells
+    const cellText = cellItems.map((i) => i.str).join(" ");
+    if (/FESTIU/i.test(cellText)) continue;
+
+    const dishes = isLunch
+      ? extractLunchDishesFromCell(cellItems)
+      : extractDinnerDishesFromCell(cellItems);
+
+    if (dishes.length > 0) {
+      menus.push({ day, dishes });
+    }
+  }
+
+  menus.sort((a, b) => a.day - b.day);
+  return menus;
 }
 
 export async function parsePdfBuffer(
@@ -168,49 +270,21 @@ export async function parsePdfBuffer(
   singleDishDays: number[] = []
 ): Promise<ParsedMenuResult> {
   try {
-    // Dynamic import of pdf-parse
-    const pdfParse = (await import("pdf-parse")).default;
-    const data = await pdfParse(buffer);
+    const { items, rawText } = await extractTextItems(buffer);
 
-    // Check if text has dash-prefixed format (lunch menus)
-    const hasDashes = data.text.includes("\n-") || data.text.startsWith("-");
+    // Detect format: dash-prefixed = lunch, otherwise = dinner
+    const isLunch = rawText.includes("\n-") || rawText.startsWith("-");
 
-    // Extract dishes based on format
-    const dishes = hasDashes
-      ? extractDishesWithDashes(data.text)
-      : extractDishesFromLines(data.text);
+    const menus = parseGrid(items, year, month, isLunch);
 
-    if (dishes.length === 0) {
+    if (menus.length === 0) {
       return {
         success: false,
         error: "No s'han trobat plats al PDF",
       };
     }
 
-    // Get weekdays in the month starting from startDay
-    const weekdays = getWeekdaysInMonth(year, month, startDay);
-
-    // Group dishes into days based on type
-    const daysOfDishes = hasDashes
-      ? groupLunchDishesIntoDays(dishes, weekdays.length)
-      : groupDinnerDishesIntoDays(dishes, weekdays, singleDishDays);
-
-    if (daysOfDishes.length > weekdays.length) {
-      console.warn(
-        `Warning: More menu days (${daysOfDishes.length}) than weekdays (${weekdays.length}) in month`
-      );
-    }
-
-    // Map to calendar dates
-    const menus: DailyMenu[] = daysOfDishes.map((dayDishes, index) => ({
-      day: index < weekdays.length ? weekdays[index] : index + 1,
-      dishes: dayDishes,
-    }));
-
-    return {
-      success: true,
-      menus,
-    };
+    return { success: true, menus };
   } catch (error) {
     return {
       success: false,
