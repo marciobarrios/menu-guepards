@@ -154,5 +154,142 @@
       ]
     }
   ],
-  "dinner": []
+  "dinner": [
+    {
+      "day": 2,
+      "dishes": [
+        "Amanida de remolatxa i pastanaga ratllada",
+        "Truita de patates"
+      ]
+    },
+    {
+      "day": 3,
+      "dishes": [
+        "Sopa minestrone amb arròs",
+        "Quiche de porros i espinacs"
+      ]
+    },
+    {
+      "day": 4,
+      "dishes": [
+        "Crema de pastanaga",
+        "Pollastre a la planxa amb enciam i ravanets confitats"
+      ]
+    },
+    {
+      "day": 5,
+      "dishes": [
+        "Amanida verda amb olives",
+        "Espaguetis integrals amb bolenyesa de llenties"
+      ]
+    },
+    {
+      "day": 6,
+      "dishes": [
+        "Hummus amb bastonets de pebrot i pastanaga",
+        "Fajites mexicanes amb guacamole i mongetes negres"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Amanida d'endívies i ceba tendra",
+        "Estofat de pèsols, patata i pernil"
+      ]
+    },
+    {
+      "day": 10,
+      "dishes": [
+        "Arròs a la cubana amb ous ferrats com a plat únic"
+      ]
+    },
+    {
+      "day": 11,
+      "dishes": [
+        "Coliflor i bròquil gratinats al forn",
+        "Pollastre al forn amb patates"
+      ]
+    },
+    {
+      "day": 12,
+      "dishes": [
+        "Amanida de remolatxa ratllada i espinacs baby",
+        "Estofat de cigrons amb espinacs i tomàquet"
+      ]
+    },
+    {
+      "day": 13,
+      "dishes": [
+        "Graellada de verdures al forn",
+        "Salmó al forn amb salsa de soja, gingebre i allet"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Crema de pera i porros",
+        "Remenat d'espàrrecs verds"
+      ]
+    },
+    {
+      "day": 17,
+      "dishes": [
+        "Flors de carxofa amb pernil",
+        "Pollastre a la llimona"
+      ]
+    },
+    {
+      "day": 18,
+      "dishes": [
+        "Estofat de faves a la catalana amb panceta i botifarra negra com a plat únic"
+      ]
+    },
+    {
+      "day": 19,
+      "dishes": [
+        "Espinacs al forn amb pases",
+        "Lluç al forn amb patates"
+      ]
+    },
+    {
+      "day": 20,
+      "dishes": [
+        "Pizza casolana"
+      ]
+    },
+    {
+      "day": 23,
+      "dishes": [
+        "Amanida de faves i julivert",
+        "Gall dindi al forn amb ceba, pastanaga i remolatxa"
+      ]
+    },
+    {
+      "day": 24,
+      "dishes": [
+        "Crema de pastanaga",
+        "Bacallà arrebossat"
+      ]
+    },
+    {
+      "day": 25,
+      "dishes": [
+        "Amanida verda amb olives i ceba tendra",
+        "Macarrons al pesto d'espinacs"
+      ]
+    },
+    {
+      "day": 26,
+      "dishes": [
+        "Estofat de llenties de verdures amb arròs com a plat únic"
+      ]
+    },
+    {
+      "day": 27,
+      "dishes": [
+        "Sopa de fideus",
+        "Truita d'alls tendres i mongetes blanques baby"
+      ]
+    }
+  ]
 }
