@@ -131,5 +131,119 @@
       ]
     }
   ],
-  "dinner": []
+  "dinner": [
+    {
+      "day": 7,
+      "dishes": [
+        "Sopa de fideus i cigrons",
+        "Pollastre al forn amb ceba tendra i pebrot vermell"
+      ]
+    },
+    {
+      "day": 8,
+      "dishes": [
+        "Crema de pèsols",
+        "Lluç al forn amb mantega i all"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Espaguetis de carbassó amb pesto",
+        "Estofat de llenties de verdures"
+      ]
+    },
+    {
+      "day": 10,
+      "dishes": [
+        "Arròs amb verduretes i ous estrellats"
+      ]
+    },
+    {
+      "day": 13,
+      "dishes": [
+        "Espinacs a la catalana",
+        "Pollastre, tomàquet i espàrrecs a la planxa"
+      ]
+    },
+    {
+      "day": 14,
+      "dishes": [
+        "Hummus de mongeta blanca amb carbassa rostida al forn"
+      ]
+    },
+    {
+      "day": 15,
+      "dishes": [
+        "Consomé d'au i verduretes",
+        "Truita de carxofa"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Amanida de rúca, nous i poma",
+        "Macarrons a la bolonyesa de vedella"
+      ]
+    },
+    {
+      "day": 17,
+      "dishes": [
+        "Bol d'arròs blanc, daus de salmó i alvocat"
+      ]
+    },
+    {
+      "day": 20,
+      "dishes": [
+        "Espaguetis amb salsa rosa de remolatxa i tomàquet",
+        "Truita francesa amb enciam i olives"
+      ]
+    },
+    {
+      "day": 21,
+      "dishes": [
+        "Mongeta verda, patata i cigrons saltats amb oli, allet i pebre vermell dolç"
+      ]
+    },
+    {
+      "day": 22,
+      "dishes": [
+        "Crema de pastanaga",
+        "Bacallà al forn amb sanfaina"
+      ]
+    },
+    {
+      "day": 23,
+      "dishes": [
+        "Amanida de tomàquet i ceba tendra",
+        "Curry de cigrons amb ou dur"
+      ]
+    },
+    {
+      "day": 24,
+      "dishes": [
+        "Pizza casolana"
+      ]
+    },
+    {
+      "day": 27,
+      "dishes": [
+        "Amanida d'endívies, ceba tendra i pera",
+        "Pollastre al forn amb mostassa i patates"
+      ]
+    },
+    {
+      "day": 28,
+      "dishes": [
+        "Estofat de faves a la catalana"
+      ]
+    },
+    {
+      "day": 29,
+      "dishes": [
+        "Carxofes al forn amb oli, sal i pebre",
+        "Sopa de peix i arròs"
+      ]
+    }
+  ]
 }
