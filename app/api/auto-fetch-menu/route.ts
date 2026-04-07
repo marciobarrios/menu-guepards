@@ -1,23 +1,34 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { fetchPdfFromUrl } from "@/lib/pdfFetcher";
 import { parsePdfBuffer } from "@/lib/menuParser";
 import { loadMenus, updateLunchMenus, updateDinnerMenus } from "@/lib/storage";
+import { sendTelegramMessage } from "@/lib/telegram";
+
+export const dynamic = "force-dynamic";
 
 const LUNCH_PDF_URL = process.env.LUNCH_PDF_URL || "https://www.ambitescola.cat/_menus/ArturMartorell-Basal.pdf";
 const DINNER_PDF_URL = process.env.DINNER_PDF_URL || "https://www.ambitescola.cat/_menus/ArturMartorell-Sopars.pdf";
 
-export async function GET() {
-  const now = new Date();
-  const day = now.getDate();
-  const month = now.getMonth() + 1;
-  const year = now.getFullYear();
+export async function GET(request: NextRequest) {
+  // Verify cron secret for Vercel cron jobs
+  const authHeader = request.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
 
-  // Only run during days 1-7 of the month
-  if (day > 7) {
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const now = new Date();
+  const day = now.getUTCDate();
+  const month = now.getUTCMonth() + 1;
+  const year = now.getUTCFullYear();
+
+  // Only run during days 1-10 of the month (school may upload PDFs late)
+  if (day > 10) {
     return NextResponse.json({
       success: true,
       skipped: true,
-      reason: "Not first week of month",
+      reason: "Past day 10 of month",
       day,
     });
   }
@@ -99,6 +110,18 @@ export async function GET() {
   }
 
   const success = results.lunch.saved && results.dinner.saved;
+
+  // Notify via Telegram if auto-fetch failed
+  if (!success) {
+    const errors = [
+      results.lunch.error ? `Lunch: ${results.lunch.error}` : null,
+      results.dinner.error ? `Dinner: ${results.dinner.error}` : null,
+    ].filter(Boolean).join("\n");
+
+    await sendTelegramMessage(
+      `⚠️ *Auto-fetch menú ha fallat*\n\n${errors}\n\nCaldrà pujar els PDFs manualment.`
+    );
+  }
 
   return NextResponse.json({
     success,

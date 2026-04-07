@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/auto-fetch-menu",
-      "schedule": "0 8 1-7 * *"
+      "schedule": "0 8 1-10 * *"
     },
     {
       "path": "/api/send-menu",
