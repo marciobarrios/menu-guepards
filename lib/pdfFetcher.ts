@@ -9,6 +9,7 @@ export async function fetchPdfFromUrl(url: string): Promise<Buffer | null> {
 
     const response = await fetch(url, {
       signal: controller.signal,
+      cache: "no-store",
     });
 
     clearTimeout(timeoutId);

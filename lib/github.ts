@@ -22,6 +22,7 @@ export async function getFileFromGitHub(path: string): Promise<{ content: string
           Authorization: `Bearer ${token}`,
           Accept: "application/vnd.github.v3+json",
         },
+        cache: "no-store",
       }
     );
 
@@ -78,6 +79,7 @@ export async function saveFileToGitHub(
           "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
+        cache: "no-store",
       }
     );
 
