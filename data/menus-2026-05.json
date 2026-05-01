@@ -139,5 +139,127 @@
       ]
     }
   ],
-  "dinner": []
+  "dinner": [
+    {
+      "day": 4,
+      "dishes": [
+        "Macarrons al pesto amb tomàquets cherri confitats",
+        "Pollastre a la planxa"
+      ]
+    },
+    {
+      "day": 5,
+      "dishes": [
+        "Lluç al forn amb ceba, pastanaga i pebrot amb acompanyament d'arròs"
+      ]
+    },
+    {
+      "day": 6,
+      "dishes": [
+        "Crema de pèsols",
+        "Hamburguesa de pollastre amb enciam i olives"
+      ]
+    },
+    {
+      "day": 7,
+      "dishes": [
+        "Amanida d'enciam, tomàquet i ravanets",
+        "Estofat de cigrons i verdures"
+      ]
+    },
+    {
+      "day": 8,
+      "dishes": [
+        "Fideus d'arròs al wok amb gambetes i verdures saltades en juliana"
+      ]
+    },
+    {
+      "day": 12,
+      "dishes": [
+        "Crema de carbassa",
+        "Pollastre arrebossat amb enciam i pastanaga"
+      ]
+    },
+    {
+      "day": 13,
+      "dishes": [
+        "Sípia a la planxa amb acompanyament d'espàrrecs verds i allets saltats amb oli d'oliva"
+      ]
+    },
+    {
+      "day": 14,
+      "dishes": [
+        "Sopa minestrone amb ceba, pastanaga, pèsols i julivert",
+        "Pollastre al forn amb xips de patata i remolatxa"
+      ]
+    },
+    {
+      "day": 15,
+      "dishes": [
+        "Pa amb tomàquet i embotit",
+        "Truita de patata"
+      ]
+    },
+    {
+      "day": 18,
+      "dishes": [
+        "Albergínia fregida amb mel",
+        "Daus de pollastre guisats amb ceba i tomàquet"
+      ]
+    },
+    {
+      "day": 19,
+      "dishes": [
+        "Estofat de faves a la catalana com a plat únic"
+      ]
+    },
+    {
+      "day": 20,
+      "dishes": [
+        "Amanida d'espinacs baby, prunes i nous",
+        "Arròs a la cubana amb ous ferrats"
+      ]
+    },
+    {
+      "day": 21,
+      "dishes": [
+        "Consmé d'au amb pistons",
+        "Carbassó farcit de carn"
+      ]
+    },
+    {
+      "day": 22,
+      "dishes": [
+        "Hummus de remolatxa amb bastonets de pa",
+        "Pollastre al forn amb farigola i romaní"
+      ]
+    },
+    {
+      "day": 26,
+      "dishes": [
+        "Crema de remolatxa",
+        "Carxofes al forn amb ou"
+      ]
+    },
+    {
+      "day": 27,
+      "dishes": [
+        "Amanida de rúca i tomàquet",
+        "Macarrons a la bolonyesa gratinats al forn"
+      ]
+    },
+    {
+      "day": 28,
+      "dishes": [
+        "Espinacs a la catalana amb pasnes i pinyons",
+        "Pollastre al forn amb patata"
+      ]
+    },
+    {
+      "day": 29,
+      "dishes": [
+        "Parmesana d'albergínia"
+      ]
+    }
+  ]
 }
