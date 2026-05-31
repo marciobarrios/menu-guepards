@@ -1,0 +1,119 @@
+{
+  "year": 2026,
+  "month": 6,
+  "lunch": [
+    {
+      "day": 1,
+      "dishes": [
+        "Crema de carbassa",
+        "Estofat de llenties amb verdures de temporada",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 2,
+      "dishes": [
+        "Arròs integral amb ceba, pebrot vermell i alberginia",
+        "Pollastre al forn amb enciam i cogombre",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 3,
+      "dishes": [
+        "Bròquil amb patates i oli d'oliva",
+        "Ous durs gratinats al forn amb tomàquet",
+        "Iogurt ecològic natural La Selvatana"
+      ]
+    },
+    {
+      "day": 4,
+      "dishes": [
+        "Sopa de brou d'au amb mill",
+        "Suprema de bacallà al forn amb ceba caramelitzada",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 5,
+      "dishes": [
+        "Espaguetis amb salsa de tomàquet i ceba",
+        "Hamburguesa de pollastre amb amanida de pastanaga i col lombarda",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 8,
+      "dishes": [
+        "Macarrons integrals a la bolonyesa de vedella",
+        "Amanida verda variada",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Vichyssoise amb crostonets",
+        "Bunyols de peix amb enciam i pastanaga",
+        "Iogurt ecològic natural La Selvatana"
+      ]
+    },
+    {
+      "day": 10,
+      "dishes": [
+        "Bledes gratinades amb beixamel i formatge",
+        "Pollastre arrebossat amb cogombre i olives",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 11,
+      "dishes": [
+        "Amanida d'arròs amb maionesa",
+        "Salmó al forn amb llit de porros",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 12,
+      "dishes": [
+        "Cigrons amb samfaina",
+        "Mandonguilles vegetals a la jardinera",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 15,
+      "dishes": [
+        "Espirals amb sofregit de ceba, pastanaga, tomàquet i remolatxa",
+        "Truita de patates amb enciam i cogombre",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Arròs integral 3 colors (pebrot verd, pebrot vermell i pastanaga)",
+        "Pernilets de pollastre al forn amb tomàquet i olives",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 17,
+      "dishes": [
+        "Guisat de mongeta blanca amb ceba, porro i api",
+        "Lluç enfarinat amb enciam i olives",
+        "Iogurt ecològic natural La Selvatana"
+      ]
+    },
+    {
+      "day": 18,
+      "dishes": [
+        "Crema de verdures de temporada",
+        "Botifarra de porc amb amanida de llenties d'acompanyament",
+        "Fruita de temporada"
+      ]
+    }
+  ],
+  "dinner": []
+}
