@@ -115,5 +115,105 @@
       ]
     }
   ],
-  "dinner": []
+  "dinner": [
+    {
+      "day": 1,
+      "dishes": [
+        "Macarrons amb tomàquet gratinats al forn",
+        "Cuixa de pollastre al forn amb enciam i remolatxa"
+      ]
+    },
+    {
+      "day": 2,
+      "dishes": [
+        "Amanida de tomàquets cherry i mozzarella",
+        "Curry de cigrons, verduretes i ou dur"
+      ]
+    },
+    {
+      "day": 3,
+      "dishes": [
+        "Ajoblanco",
+        "Lluç enfarinat al forn amb espàrrecs verds d'acompanyament"
+      ]
+    },
+    {
+      "day": 4,
+      "dishes": [
+        "Plat combinat: Mongeta verda amb patates i oli d'oliva i hamburguesa de vedella a la planxa"
+      ]
+    },
+    {
+      "day": 5,
+      "dishes": [
+        "Coca de pebrot, albergínia i salsitxes de pollastre"
+      ]
+    },
+    {
+      "day": 8,
+      "dishes": [
+        "Plat combinat: amanida de llenties amb truita de patates i ceba tendra"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Crema de remolatxa i patata",
+        "Pollastre al forn a la llimona"
+      ]
+    },
+    {
+      "day": 10,
+      "dishes": [
+        "Sopa de brou d'au amb arròs i verduretes",
+        "Esqueixada de bacallà amb ceba i tomàquet confitat"
+      ]
+    },
+    {
+      "day": 11,
+      "dishes": [
+        "Amanida de rúca, ravanets i pastanaga",
+        "Guisat de pèsols i pernil"
+      ]
+    },
+    {
+      "day": 12,
+      "dishes": [
+        "Noodles d'arròs amb saltat de verduretes, gambetes i ous estrellats"
+      ]
+    },
+    {
+      "day": 15,
+      "dishes": [
+        "Guacamole amb bastonets de pastanaga",
+        "Guisat de llenties amb verduretes"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Mongeta verda amb cigrons saltada amb allet, oli d'oliva i pebre vermell dolç",
+        "Salmó al forn amb ceba i patata"
+      ]
+    },
+    {
+      "day": 17,
+      "dishes": [
+        "Arròs a la cubana amb ous ferrats com a plat únic"
+      ]
+    },
+    {
+      "day": 18,
+      "dishes": [
+        "Salmorejo de cogombre",
+        "Espaguetis a la bolonyesa de vedella"
+      ]
+    },
+    {
+      "day": 19,
+      "dishes": [
+        "Pastís de verdures i ou al forn amb formatge"
+      ]
+    }
+  ]
 }
