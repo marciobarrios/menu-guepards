@@ -43,7 +43,9 @@ export async function GET(request: NextRequest) {
       monthName
     );
 
-    const result = await sendTelegramMessage(message);
+    const result = await sendTelegramMessage(message, {
+      includeWhatsAppShare: true,
+    });
 
     return NextResponse.json({
       success: result.success,
@@ -82,7 +84,9 @@ export async function POST() {
       monthName
     );
 
-    const result = await sendTelegramMessage(message);
+    const result = await sendTelegramMessage(message, {
+      includeWhatsAppShare: true,
+    });
 
     return NextResponse.json({
       success: result.success,
