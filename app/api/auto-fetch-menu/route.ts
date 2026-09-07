@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
 
     if (lunchBuffer) {
       results.lunch.fetched = true;
-      const parseResult = await parsePdfBuffer(lunchBuffer, year, month, 1, []);
+      const parseResult = await parsePdfBuffer(lunchBuffer, year, month);
 
       if (parseResult.success && parseResult.menus) {
         results.lunch.parsed = true;
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
 
     if (dinnerBuffer) {
       results.dinner.fetched = true;
-      const parseResult = await parsePdfBuffer(dinnerBuffer, year, month, 1, []);
+      const parseResult = await parsePdfBuffer(dinnerBuffer, year, month);
 
       if (parseResult.success && parseResult.menus) {
         results.dinner.parsed = true;

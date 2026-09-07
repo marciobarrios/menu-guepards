@@ -33,8 +33,6 @@ export default function Home() {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
-  const [startDay, setStartDay] = useState(1);
-  const [singleDishDays, setSingleDishDays] = useState("");
 
   const [lunchFile, setLunchFile] = useState<File | null>(null);
   const [dinnerFile, setDinnerFile] = useState<File | null>(null);
@@ -74,8 +72,6 @@ export default function Home() {
     formData.append("type", type);
     formData.append("year", selectedYear.toString());
     formData.append("month", selectedMonth.toString());
-    formData.append("startDay", startDay.toString());
-    formData.append("singleDishDays", singleDishDays);
     formData.append("save", "false");
 
     try {
@@ -114,8 +110,6 @@ export default function Home() {
     formData.append("type", type);
     formData.append("year", selectedYear.toString());
     formData.append("month", selectedMonth.toString());
-    formData.append("startDay", startDay.toString());
-    formData.append("singleDishDays", singleDishDays);
     formData.append("save", "true");
 
     try {
@@ -226,30 +220,9 @@ export default function Home() {
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Primer dia amb menú</label>
-            <input
-              type="number"
-              min={1}
-              max={31}
-              value={startDay}
-              onChange={(e) => setStartDay(parseInt(e.target.value, 10) || 1)}
-              className="border rounded-lg px-4 py-2 text-gray-700 w-20"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-gray-600 mb-1">Dies plat únic (sopars)</label>
-            <input
-              type="text"
-              placeholder="ex: 15, 23, 30"
-              value={singleDishDays}
-              onChange={(e) => setSingleDishDays(e.target.value)}
-              className="border rounded-lg px-4 py-2 text-gray-700 w-32"
-            />
-          </div>
         </div>
         <p className="text-sm text-gray-500 mt-2">
-          Primer dia: indica quan comença el menú. Dies plat únic: dies amb un sol plat al sopar.
+          Les dates i els dies de plat únic es detecten automàticament a partir de la graella del PDF.
         </p>
       </section>
 
