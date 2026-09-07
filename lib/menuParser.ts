@@ -10,14 +10,14 @@ interface TextItem {
 const SKIP_MARKERS = ["@", "ESCOLA", "MARTORELL", "BASAL", "SOPARS", "GASTRONOMIA", "FESTIU"];
 
 /**
- * Find the first Monday of the month at or after startDay.
+ * Find the first Monday of the month.
  */
-function getFirstMonday(year: number, month: number, startDay: number): number {
-  for (let d = startDay; d <= startDay + 7; d++) {
+function getFirstMonday(year: number, month: number): number {
+  for (let d = 1; d <= 7; d++) {
     const date = new Date(year, month - 1, d);
     if (date.getDay() === 1) return d;
   }
-  return startDay;
+  return 1;
 }
 
 /**
@@ -235,7 +235,7 @@ function parseGrid(
   }
 
   // Map grid positions to calendar days
-  const firstMonday = getFirstMonday(year, month, 1);
+  const firstMonday = getFirstMonday(year, month);
   const daysInMonth = new Date(year, month, 0).getDate();
   const menus: DailyMenu[] = [];
 
@@ -265,9 +265,7 @@ function parseGrid(
 export async function parsePdfBuffer(
   buffer: Buffer,
   year: number,
-  month: number,
-  startDay: number = 1,
-  singleDishDays: number[] = []
+  month: number
 ): Promise<ParsedMenuResult> {
   try {
     const { items, rawText } = await extractTextItems(buffer);
