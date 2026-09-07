@@ -1,4 +1,5 @@
 import { DailyMenu, ParsedMenuResult } from "./types";
+import { validateMenuPeriod } from "./menuPeriod";
 
 interface TextItem {
   str: string;
@@ -63,7 +64,9 @@ function assignToRow(y: number, rowBoundaries: number[]): number {
 /**
  * Extract text items with (x, y) positions from a PDF buffer.
  */
-async function extractTextItems(buffer: Buffer): Promise<{ items: TextItem[]; rawText: string }> {
+async function extractTextItems(
+  buffer: Buffer
+): Promise<{ items: TextItem[]; rawText: string; title: string }> {
   const pdfParse = (await import("pdf-parse")).default;
   const items: TextItem[] = [];
   let rawText = "";
@@ -93,8 +96,10 @@ async function extractTextItems(buffer: Buffer): Promise<{ items: TextItem[]; ra
     });
   }
 
-  await (pdfParse as any)(buffer, { pagerender: customRender });
-  return { items, rawText };
+  const data = await (pdfParse as any)(buffer, { pagerender: customRender });
+  const title = typeof data.info?.Title === "string" ? data.info.Title : "";
+
+  return { items, rawText, title };
 }
 
 /**
@@ -268,7 +273,17 @@ export async function parsePdfBuffer(
   month: number
 ): Promise<ParsedMenuResult> {
   try {
-    const { items, rawText } = await extractTextItems(buffer);
+    const { items, rawText, title } = await extractTextItems(buffer);
+    // The school's fixed URLs can still serve the previous month's PDF.
+    // Reject it before its grid is mapped onto the requested calendar month.
+    const periodError = validateMenuPeriod(title, year, month);
+
+    if (periodError) {
+      return {
+        success: false,
+        error: periodError,
+      };
+    }
 
     // Detect format: dash-prefixed = lunch, otherwise = dinner
     const isLunch = rawText.includes("\n-") || rawText.startsWith("-");
