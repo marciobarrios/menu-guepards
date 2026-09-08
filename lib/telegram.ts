@@ -1,6 +1,17 @@
 import { SendResult } from "./types";
 
-export async function sendTelegramMessage(message: string): Promise<SendResult> {
+interface TelegramMessageOptions {
+  includeWhatsAppShare?: boolean;
+}
+
+export function getWhatsAppShareUrl(message: string): string {
+  return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
+export async function sendTelegramMessage(
+  message: string,
+  options: TelegramMessageOptions = {}
+): Promise<SendResult> {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -23,6 +34,18 @@ export async function sendTelegramMessage(message: string): Promise<SendResult> 
         chat_id: chatId,
         text: message,
         parse_mode: "Markdown",
+        ...(options.includeWhatsAppShare && {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "Compartir per WhatsApp",
+                  url: getWhatsAppShareUrl(message),
+                },
+              ],
+            ],
+          },
+        }),
       }),
     });
 
