@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/send-menu",
-      "schedule": "0 10 * * 1-5"
+      "schedule": "0 9 * * 1-5"
     }
   ]
 }
