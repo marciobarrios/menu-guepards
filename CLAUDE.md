@@ -12,7 +12,7 @@ Daily school menu notification system via Telegram with web interface for PDF up
 ```
 app/
   api/
-    send-menu/       # Telegram send (cron: 10 AM weekdays)
+    send-menu/       # Telegram send (cron: 9 AM UTC weekdays)
     parse-menu/      # PDF upload & parsing
     auto-fetch-menu/ # Auto PDF fetch (cron: 8 AM days 1-7)
     menus/           # Menu retrieval
