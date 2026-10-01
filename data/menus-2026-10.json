@@ -1,0 +1,316 @@
+{
+  "year": 2026,
+  "month": 10,
+  "lunch": [
+    {
+      "day": 1,
+      "dishes": [
+        "Estofat de llenties amb moniato i pastanaga",
+        "Calamars en salsa verda",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 2,
+      "dishes": [
+        "Ensaladilla russa amb tonyina i maionesa",
+        "Ous durs amb salsa de tomàquet",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 5,
+      "dishes": [
+        "Sopa de brou d'au amb fideus i mill",
+        "Pollastre adobat al forn amb enciam i olives",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 6,
+      "dishes": [
+        "Mongetes estofades amb verdures de temporada",
+        "Salmó al forn amb moniato",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 7,
+      "dishes": [
+        "Crema de carbassa amb crostonets",
+        "Curry de cigrons",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 8,
+      "dishes": [
+        "Rostit de bledes i patata",
+        "Truita de porros amb enciam i tomàquet amanit",
+        "Iogurt ecològic natural La Selvatana"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Arròs integral amb ceba i tomàquet",
+        "Fricandó de vedella",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 13,
+      "dishes": [
+        "Llenties estofades amb arròs i verdures",
+        "Lluç al forn amb all i julivert amb enciam i pastanaga",
+        "Iogurt ecològic natural La Selvatana"
+      ]
+    },
+    {
+      "day": 14,
+      "dishes": [
+        "Crema de verdures i mill",
+        "Gall dindi al forn amb remolatxa i ceba caramelitzada",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 15,
+      "dishes": [
+        "Trinxat de col i moniato",
+        "Truita de patates amb enciam i tomàquet amanit",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Arròs amb verduretes",
+        "Botifarra de porc amb mongetes a l'allet",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 19,
+      "dishes": [
+        "Crema de carbassó",
+        "Mandonguilles de vedella a la jardinera",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 20,
+      "dishes": [
+        "Cigrons amb espinacs",
+        "Pollastre arrebossat al forn amb enciam i pastanaga",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 21,
+      "dishes": [
+        "Macarrons integrals amb tomàquet, pastanaga i remolatxa",
+        "Truita de formatge amb amanida de llenties d'acompanyament",
+        "Iogurt ecològic natural La Selvatana"
+      ]
+    },
+    {
+      "day": 22,
+      "dishes": [
+        "Arròs amb salsa de carbassa i formatge",
+        "Gall dindi amb llit de ceba i moniato",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 23,
+      "dishes": [
+        "Patata i bledes al forn amb oli d'oliva",
+        "Bacallà al forn amb salsa de tomàquet",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 26,
+      "dishes": [
+        "Amanida de patata amb maionesa i ou dur",
+        "Gall dindi al forn amb amanida verda variada",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 27,
+      "dishes": [
+        "Crema de moniato i pastanaga",
+        "Guisat de mongeta blanca amb verdures de temporada",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 28,
+      "dishes": [
+        "Hummus de cigrons amb llesquetes de pa",
+        "Contracuixa de pollastre al forn amb amb xips de moniato",
+        "Fruita de temporada"
+      ]
+    },
+    {
+      "day": 29,
+      "dishes": [
+        "Trinxat de col i patata",
+        "Bunyols de peix i gaspatxo de guarnició",
+        "Iogurt ecològic natural La Selvatana"
+      ]
+    },
+    {
+      "day": 30,
+      "dishes": [
+        "Gastronomia del mes"
+      ]
+    }
+  ],
+  "dinner": [
+    {
+      "day": 1,
+      "dishes": [
+        "Crema de pastanaga i moniato",
+        "Tumbet de llampuga amb patata, carbassó, albergínia, tomàquet i pebrot verd"
+      ]
+    },
+    {
+      "day": 2,
+      "dishes": [
+        "Amanida de pastanaga i remolatxa ratllades",
+        "Wok de fideus d'arròs amb pollastre"
+      ]
+    },
+    {
+      "day": 5,
+      "dishes": [
+        "Rechino de mongeta tendra amb patates i cigrons saltats amb allet i pebre vermell dolç com a plat únic"
+      ]
+    },
+    {
+      "day": 6,
+      "dishes": [
+        "Sopa de quinoa amb verduretes",
+        "Hamburguesa de vedella amb enciam, ceba i ravanets encurtits"
+      ]
+    },
+    {
+      "day": 7,
+      "dishes": [
+        "Safata de verdures al forn (albergínia, porro, carbassó, pebrot vermell...)",
+        "Pollastre al forn amb farigola i romaní"
+      ]
+    },
+    {
+      "day": 8,
+      "dishes": [
+        "Estofat de llenties amb verdures de temporada com a plat únic"
+      ]
+    },
+    {
+      "day": 9,
+      "dishes": [
+        "Taula d'embotits i pa amb tomàquet",
+        "Truita de patates"
+      ]
+    },
+    {
+      "day": 13,
+      "dishes": [
+        "Amanida verda amb olives i tomàquets",
+        "Arròs a la cubana amb ous ferrats"
+      ]
+    },
+    {
+      "day": 14,
+      "dishes": [
+        "\"Amanida\" de daus de carbassa rostida al forn amb formatge feta",
+        "Curry amb cigrons, pollastre i bolets"
+      ]
+    },
+    {
+      "day": 15,
+      "dishes": [
+        "Crema de carbassó",
+        "Lluç enfarinat fregit"
+      ]
+    },
+    {
+      "day": 16,
+      "dishes": [
+        "Pizza casolana"
+      ]
+    },
+    {
+      "day": 19,
+      "dishes": [
+        "Saltat de mongeta verda amb pernil",
+        "Bonítol amb ceba en juliana, mel i salsa de soja"
+      ]
+    },
+    {
+      "day": 20,
+      "dishes": [
+        "Amanida verda amb poma, tomàquet i figues",
+        "Guisat de llenties i moniato"
+      ]
+    },
+    {
+      "day": 21,
+      "dishes": [
+        "Crema de porros i pera",
+        "Salsitxes amb salsa de tomàquet"
+      ]
+    },
+    {
+      "day": 22,
+      "dishes": [
+        "Espaguetis al pesto",
+        "Pollastre a la planxa amb carbassó a rodanxes saltat"
+      ]
+    },
+    {
+      "day": 23,
+      "dishes": [
+        "Moniatos farcits amb mongetes, verdures i espècies al gust"
+      ]
+    },
+    {
+      "day": 26,
+      "dishes": [
+        "Crema de carbassa",
+        "Daus de pollastre i albergínia saltats a la paella"
+      ]
+    },
+    {
+      "day": 27,
+      "dishes": [
+        "Saltat de bolets amb all i julivert",
+        "Hamburguesa de vedella amb xips de moniato i patates"
+      ]
+    },
+    {
+      "day": 28,
+      "dishes": [
+        "Amanida de llenties amb tomàquet i cogombre",
+        "Salmó al forn a la papillote"
+      ]
+    },
+    {
+      "day": 29,
+      "dishes": [
+        "Amanida de remolatxa i carbassó ratllats amb olives",
+        "Mongetes blanques estofades"
+      ]
+    },
+    {
+      "day": 30,
+      "dishes": [
+        "Macarrons a la bolonyesa com a plat únic"
+      ]
+    }
+  ]
+}
