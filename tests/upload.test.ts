@@ -19,7 +19,9 @@ function upload() {
   return form;
 }
 function request(body: FormData) {
-  return new NextRequest("http://localhost/api/parse-menu", { method: "POST", body });
+  return new NextRequest("http://localhost/api/parse-menu", {
+    method: "POST", body, headers: { authorization: "Bearer test-only-owner-secret" },
+  });
 }
 
 beforeEach(() => {
@@ -86,7 +88,9 @@ it("caps chunked requests without trusting Content-Length and cancels the stream
 });
 
 it("returns a client error for malformed multipart input", async () => {
-  const req = new NextRequest("http://localhost/upload", { method: "POST", body: "bad", headers: { "content-type": "multipart/form-data; boundary=test" } });
+  const req = new NextRequest("http://localhost/upload", { method: "POST", body: "bad", headers: {
+    "content-type": "multipart/form-data; boundary=test", authorization: "Bearer test-only-owner-secret",
+  } });
   expect((await POST(req)).status).toBe(400);
 });
 

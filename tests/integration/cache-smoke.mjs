@@ -22,6 +22,7 @@ const server = spawn(process.execPath, [
     ...process.env, MOCK_GITHUB_LOG: logFile,
     // Unique token isolates the framework cache between test runs.
     GITHUB_TOKEN: `test-only-${Date.now()}`, CRON_SECRET: "test-only-cron-secret",
+    OWNER_SECRET: "test-only-owner-secret",
     TELEGRAM_BOT_TOKEN: "", TELEGRAM_CHAT_ID: "", NEXT_TELEMETRY_DISABLED: "1",
   },
   stdio: ["ignore", "pipe", "pipe"],
@@ -54,13 +55,24 @@ try {
   assert.deepEqual((await readMenus()).lunch, []);
   assert.deepEqual(events(), ["GET"], "Repeated reads must hit Next's data cache");
 
+  for (const path of ["parse-menu", "send-menu"]) {
+    for (const headers of [{}, { authorization: "Bearer test-only-cron-secret" }]) {
+      const denied = await fetch(`${origin}/api/${path}`, { method: "POST", body: "invalid upload", headers });
+      assert.equal(denied.status, 401, "Manual operations require the owner credential");
+      assert.equal(denied.headers.get("cache-control"), "no-store");
+    }
+  }
+  assert.deepEqual(events(), ["GET"], "Unauthorized requests must not read or write GitHub");
+
   const form = new FormData();
   form.set("file", new Blob([menuPdf()], { type: "application/pdf" }), "menu.pdf");
   form.set("year", "2026");
   form.set("month", "10");
   form.set("type", "lunch");
   form.set("save", "true");
-  const saved = await fetch(`${origin}/api/parse-menu`, { method: "POST", body: form });
+  const saved = await fetch(`${origin}/api/parse-menu`, {
+    method: "POST", body: form, headers: { authorization: "Bearer test-only-owner-secret" },
+  });
   assert.equal(saved.status, 200, await saved.clone().text());
   assert.equal((await saved.json()).saved, true);
   assert.deepEqual(events(), ["GET", "GET", "PUT"], "Save must read a fresh SHA and write once");
@@ -70,7 +82,7 @@ try {
   assert.equal(afterSave.dinner[0].dishes[0], "Preserved dinner");
   await readMenus();
   assert.deepEqual(events(), ["GET", "GET", "PUT", "GET"], "Save must invalidate and repopulate the cache");
-  console.log("Production-server smoke test passed: public cache hit, fresh conditional save, preserved dinner, immediate invalidation.");
+  console.log("Production-server smoke test passed: public cache hit, owner authorization, fresh conditional save, preserved dinner, immediate invalidation.");
 } catch (error) {
   console.error(output);
   throw error;

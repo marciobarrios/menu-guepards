@@ -39,6 +39,7 @@ pdfs/                # Uploaded PDFs (gitignored)
 - `GITHUB_TOKEN`
 - `LUNCH_PDF_URL` / `DINNER_PDF_URL` (auto-fetch)
 - `CRON_SECRET` (required for cron; missing or blank disables scheduled operations)
+- `OWNER_SECRET` (required for manual preview/save/send; separate from CRON_SECRET)
 
 ## Data Format
 

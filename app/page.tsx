@@ -41,7 +41,10 @@ export default function Home() {
   const [dinnerPreview, setDinnerPreview] = useState<DailyMenu[] | null>(null);
 
   const [currentMenus, setCurrentMenus] = useState<MonthMenus | null>(null);
+  // Only the value entered by the owner lives here, never a server-provided secret.
+  const [ownerSecret, setOwnerSecret] = useState("");
   const [loading, setLoading] = useState(false);
+  const manualActionsDisabled = loading || !ownerSecret.trim();
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const loadCurrentMenus = useCallback(async () => {
@@ -63,6 +66,14 @@ export default function Home() {
     loadCurrentMenus();
   }, [loadCurrentMenus]);
 
+  async function ownerFetch(path: "/api/parse-menu" | "/api/send-menu", init: RequestInit) {
+    const headers = new Headers(init.headers);
+    headers.set("Authorization", `Bearer ${ownerSecret}`);
+    const response = await fetch(path, { ...init, headers });
+    if (response.status === 401) setOwnerSecret("");
+    return response;
+  }
+
   async function parseFile(file: File, type: "lunch" | "dinner") {
     setLoading(true);
     setMessage(null);
@@ -75,7 +86,7 @@ export default function Home() {
     formData.append("save", "false");
 
     try {
-      const res = await fetch("/api/parse-menu", {
+      const res = await ownerFetch("/api/parse-menu", {
         method: "POST",
         body: formData,
       });
@@ -113,7 +124,7 @@ export default function Home() {
     formData.append("save", "true");
 
     try {
-      const res = await fetch("/api/parse-menu", {
+      const res = await ownerFetch("/api/parse-menu", {
         method: "POST",
         body: formData,
       });
@@ -144,7 +155,7 @@ export default function Home() {
     setMessage(null);
 
     try {
-      const res = await fetch("/api/send-menu", { method: "POST" });
+      const res = await ownerFetch("/api/send-menu", { method: "POST" });
       const data = await res.json();
 
       if (data.success) {
@@ -226,6 +237,37 @@ export default function Home() {
         </p>
       </section>
 
+      <section className="bg-white rounded-lg shadow p-6 mb-6" aria-labelledby="owner-access-heading">
+        <h2 id="owner-access-heading" className="text-xl font-semibold mb-4">Accés de propietari</h2>
+        <label htmlFor="owner-secret" className="block text-sm text-gray-600 mb-1">Clau de propietari</label>
+        <div className="flex flex-wrap gap-3">
+          <input
+            id="owner-secret"
+            type="password"
+            value={ownerSecret}
+            onChange={(e) => setOwnerSecret(e.target.value)}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            aria-describedby="owner-secret-help"
+            disabled={loading}
+            className="border rounded-lg px-4 py-2 text-gray-700 min-w-0 flex-1"
+          />
+          <button
+            type="button"
+            onClick={() => setOwnerSecret("")}
+            disabled={loading || !ownerSecret}
+            className="border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50"
+          >
+            Esborrar clau
+          </button>
+        </div>
+        <p id="owner-secret-help" className="text-sm text-gray-500 mt-2">
+          Introdueix la clau per pujar PDFs, guardar menús o enviar missatges.
+          La clau es manté només mentre aquesta pàgina és oberta. Pots consultar els menús sense clau.
+        </p>
+      </section>
+
       {/* Upload Section */}
       <section className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Pujar PDFs</h2>
@@ -242,7 +284,7 @@ export default function Home() {
               accept=".pdf"
               onChange={(e) => handleFileChange(e, "lunch")}
               className="w-full text-sm"
-              disabled={loading}
+              disabled={manualActionsDisabled}
             />
             {lunchPreview && (
               <div className="mt-4">
@@ -252,7 +294,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => saveMenus("lunch")}
-                  disabled={loading}
+                  disabled={manualActionsDisabled}
                   className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 w-full"
                 >
                   Guardar menús de dinar
@@ -269,7 +311,7 @@ export default function Home() {
               accept=".pdf"
               onChange={(e) => handleFileChange(e, "dinner")}
               className="w-full text-sm"
-              disabled={loading}
+              disabled={manualActionsDisabled}
             />
             {dinnerPreview && (
               <div className="mt-4">
@@ -279,7 +321,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => saveMenus("dinner")}
-                  disabled={loading}
+                  disabled={manualActionsDisabled}
                   className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 w-full"
                 >
                   Guardar propostes de sopar
@@ -387,7 +429,7 @@ export default function Home() {
         </p>
         <button
           onClick={sendNow}
-          disabled={loading}
+          disabled={manualActionsDisabled}
           className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
         >
           {loading ? "Enviant..." : "Enviar ara"}

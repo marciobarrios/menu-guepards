@@ -3,8 +3,12 @@ import { parsePdfBuffer } from "@/lib/menuParser";
 import { updateLunchMenus, updateDinnerMenus } from "@/lib/storage";
 import { parseMenuDate } from "@/lib/menuDate";
 import { readUploadForm, readPdfFile, UploadError } from "@/lib/pdfValidation";
+import { requireOwnerAuthorization } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
+  const denied = requireOwnerAuthorization(request);
+  if (denied) return denied;
+
   try {
     const formData = await readUploadForm(request);
     for (const field of ["file", "type", "year", "month", "save"]) {

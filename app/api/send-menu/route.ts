@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTodayMenus } from "@/lib/storage";
 import { sendTelegramMessage, formatMenuMessage, CATALAN_MONTHS } from "@/lib/telegram";
-import { requireCronAuthorization } from "@/lib/auth";
+import { requireCronAuthorization, requireOwnerAuthorization } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -62,7 +62,10 @@ export async function GET(request: NextRequest) {
 }
 
 // Also support POST for manual triggers from UI
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const denied = requireOwnerAuthorization(request);
+  if (denied) return denied;
+
   try {
     const { lunch, dinner, month, year, day } = await getTodayMenus();
 
