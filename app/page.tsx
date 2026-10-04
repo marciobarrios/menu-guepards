@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface DailyMenu {
   day: number;
@@ -41,15 +41,15 @@ export default function Home() {
   const [dinnerPreview, setDinnerPreview] = useState<DailyMenu[] | null>(null);
 
   const [currentMenus, setCurrentMenus] = useState<MonthMenus | null>(null);
+  // Only the value entered by the owner lives here, never a server-provided secret.
+  const [ownerSecret, setOwnerSecret] = useState("");
+  const [rememberedOwner, setRememberedOwner] = useState(false);
+  const [checkingOwner, setCheckingOwner] = useState(true);
   const [loading, setLoading] = useState(false);
+  const manualActionsDisabled = loading || checkingOwner || (!rememberedOwner && !ownerSecret.trim());
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Load current month's menus on mount and when selection changes
-  useEffect(() => {
-    loadCurrentMenus();
-  }, [selectedYear, selectedMonth]);
-
-  async function loadCurrentMenus() {
+  const loadCurrentMenus = useCallback(async () => {
     try {
       const res = await fetch(`/api/menus?year=${selectedYear}&month=${selectedMonth}`);
       const data = await res.json();
@@ -60,6 +60,72 @@ export default function Home() {
       }
     } catch {
       setCurrentMenus(null);
+    }
+  }, [selectedYear, selectedMonth]);
+
+  // Load current month's menus on mount and when selection changes
+  useEffect(() => {
+    loadCurrentMenus();
+  }, [loadCurrentMenus]);
+
+  useEffect(() => {
+    let active = true;
+    fetch("/api/owner-session", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => { if (active) setRememberedOwner(data.remembered === true); })
+      .catch(() => {})
+      .finally(() => { if (active) setCheckingOwner(false); });
+    return () => { active = false; };
+  }, []);
+
+  async function ownerFetch(path: "/api/parse-menu" | "/api/send-menu" | "/api/owner-session", init: RequestInit) {
+    const headers = new Headers(init.headers);
+    if (ownerSecret) headers.set("Authorization", `Bearer ${ownerSecret}`);
+    const response = await fetch(path, { ...init, headers });
+    if (response.status === 401 || response.status === 503) {
+      setOwnerSecret("");
+      setRememberedOwner(false);
+    }
+    return response;
+  }
+
+  async function rememberThisDevice() {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const response = await ownerFetch("/api/owner-session", { method: "POST" });
+      const data = await response.json();
+      if (data.success) {
+        setRememberedOwner(true);
+        setOwnerSecret("");
+        setMessage({ type: "success", text: "Dispositiu recordat." });
+      } else {
+        setMessage({ type: "error", text: data.error });
+      }
+    } catch {
+      setMessage({ type: "error", text: "No s'ha pogut recordar el dispositiu." });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function forgetThisDevice() {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/owner-session", { method: "DELETE" });
+      const data = await response.json();
+      if (data.success) {
+        setRememberedOwner(false);
+        setOwnerSecret("");
+        setMessage({ type: "success", text: "Accés oblidat en aquest dispositiu." });
+      } else {
+        setMessage({ type: "error", text: data.error });
+      }
+    } catch {
+      setMessage({ type: "error", text: "No s'ha pogut oblidar el dispositiu. Torna-ho a provar." });
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -75,7 +141,7 @@ export default function Home() {
     formData.append("save", "false");
 
     try {
-      const res = await fetch("/api/parse-menu", {
+      const res = await ownerFetch("/api/parse-menu", {
         method: "POST",
         body: formData,
       });
@@ -113,7 +179,7 @@ export default function Home() {
     formData.append("save", "true");
 
     try {
-      const res = await fetch("/api/parse-menu", {
+      const res = await ownerFetch("/api/parse-menu", {
         method: "POST",
         body: formData,
       });
@@ -144,7 +210,7 @@ export default function Home() {
     setMessage(null);
 
     try {
-      const res = await fetch("/api/send-menu", { method: "POST" });
+      const res = await ownerFetch("/api/send-menu", { method: "POST" });
       const data = await res.json();
 
       if (data.success) {
@@ -226,6 +292,54 @@ export default function Home() {
         </p>
       </section>
 
+      <section className="bg-white rounded-lg shadow p-6 mb-6" aria-labelledby="owner-access-heading">
+        <h2 id="owner-access-heading" className="text-xl font-semibold mb-4">Accés de propietari</h2>
+        {rememberedOwner ? (
+          <div className="flex flex-wrap gap-3 items-center">
+            <p className="text-gray-600">Accés recordat en aquest dispositiu.</p>
+            <button type="button" onClick={forgetThisDevice} disabled={loading}
+              className="border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50">
+              Oblidar aquest dispositiu
+            </button>
+          </div>
+        ) : (
+          <>
+            <label htmlFor="owner-secret" className="block text-sm text-gray-600 mb-1">Clau de propietari</label>
+            <div className="flex flex-wrap gap-3">
+              <input
+                id="owner-secret"
+                type="password"
+                value={ownerSecret}
+                onChange={(e) => setOwnerSecret(e.target.value)}
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                aria-describedby="owner-secret-help"
+                disabled={loading || checkingOwner}
+                className="border rounded-lg px-4 py-2 text-gray-700 min-w-0 flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => setOwnerSecret("")}
+                disabled={loading || !ownerSecret}
+                className="border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50"
+              >
+                Esborrar clau
+              </button>
+            </div>
+            <p id="owner-secret-help" className="text-sm text-gray-500 mt-2">
+              Introdueix la clau per pujar PDFs, guardar menús o enviar missatges.
+              Pots usar-la només en aquesta visita o recordar aquest dispositiu. Pots consultar els menús sense clau.
+            </p>
+            <button type="button" onClick={rememberThisDevice}
+              disabled={loading || checkingOwner || !ownerSecret.trim()}
+              className="mt-3 border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50">
+              Recordar aquest dispositiu
+            </button>
+          </>
+        )}
+      </section>
+
       {/* Upload Section */}
       <section className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4">Pujar PDFs</h2>
@@ -242,7 +356,7 @@ export default function Home() {
               accept=".pdf"
               onChange={(e) => handleFileChange(e, "lunch")}
               className="w-full text-sm"
-              disabled={loading}
+              disabled={manualActionsDisabled}
             />
             {lunchPreview && (
               <div className="mt-4">
@@ -252,7 +366,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => saveMenus("lunch")}
-                  disabled={loading}
+                  disabled={manualActionsDisabled}
                   className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 w-full"
                 >
                   Guardar menús de dinar
@@ -269,7 +383,7 @@ export default function Home() {
               accept=".pdf"
               onChange={(e) => handleFileChange(e, "dinner")}
               className="w-full text-sm"
-              disabled={loading}
+              disabled={manualActionsDisabled}
             />
             {dinnerPreview && (
               <div className="mt-4">
@@ -279,7 +393,7 @@ export default function Home() {
                 </div>
                 <button
                   onClick={() => saveMenus("dinner")}
-                  disabled={loading}
+                  disabled={manualActionsDisabled}
                   className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-amber-600 disabled:opacity-50 w-full"
                 >
                   Guardar propostes de sopar
@@ -381,13 +495,13 @@ export default function Home() {
 
       {/* Send Now Section */}
       <section className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Enviar menú d'avui</h2>
+        <h2 className="text-xl font-semibold mb-4">Enviar menú d&apos;avui</h2>
         <p className="text-gray-600 mb-4">
           Envia el menú del dia actual via Telegram.
         </p>
         <button
           onClick={sendNow}
-          disabled={loading}
+          disabled={manualActionsDisabled}
           className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50"
         >
           {loading ? "Enviant..." : "Enviar ara"}

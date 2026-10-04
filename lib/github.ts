@@ -7,7 +7,13 @@ interface GitHubFileResponse {
   content: string;
 }
 
-export async function getFileFromGitHub(path: string): Promise<{ content: string; sha: string } | null> {
+interface ReadCache {
+  revalidate: number;
+  tags: string[];
+}
+
+// Fresh by default: mutation callers must never reuse cached content or SHAs.
+export async function getFileFromGitHub(path: string, cache?: ReadCache): Promise<{ content: string; sha: string } | null> {
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
     console.error("GITHUB_TOKEN not configured");
@@ -22,7 +28,7 @@ export async function getFileFromGitHub(path: string): Promise<{ content: string
           Authorization: `Bearer ${token}`,
           Accept: "application/vnd.github.v3+json",
         },
-        cache: "no-store",
+        ...(cache ? { next: cache } : { cache: "no-store" as const }),
       }
     );
 
@@ -46,7 +52,8 @@ export async function getFileFromGitHub(path: string): Promise<{ content: string
 export async function saveFileToGitHub(
   path: string,
   content: string,
-  message: string
+  message: string,
+  expectedSha?: string | null
 ): Promise<boolean> {
   const token = process.env.GITHUB_TOKEN;
   if (!token) {
@@ -56,7 +63,11 @@ export async function saveFileToGitHub(
 
   try {
     // First, try to get the current file to get its SHA (needed for updates)
-    const existing = await getFileFromGitHub(path);
+    // When updating a menu, use the SHA of the content we actually merged.
+    // A concurrent edit must conflict instead of being silently overwritten.
+    const sha = expectedSha === undefined
+      ? (await getFileFromGitHub(path))?.sha
+      : expectedSha;
 
     const body: Record<string, string> = {
       message,
@@ -65,8 +76,8 @@ export async function saveFileToGitHub(
     };
 
     // If file exists, include SHA to update it
-    if (existing) {
-      body.sha = existing.sha;
+    if (sha) {
+      body.sha = sha;
     }
 
     const response = await fetch(

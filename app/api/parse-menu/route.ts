@@ -1,38 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 import { parsePdfBuffer } from "@/lib/menuParser";
 import { updateLunchMenus, updateDinnerMenus } from "@/lib/storage";
+import { parseMenuDate } from "@/lib/menuDate";
+import { readUploadForm, readPdfFile, UploadError } from "@/lib/pdfValidation";
+import { requireOwnerAuthorization } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
+  const denied = requireOwnerAuthorization(request);
+  if (denied) return denied;
+
   try {
-    const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-    const type = formData.get("type") as string | null; // "lunch" or "dinner"
-    const year = parseInt(formData.get("year") as string, 10);
-    const month = parseInt(formData.get("month") as string, 10);
-    const save = formData.get("save") === "true";
-
-    if (!file) {
-      return NextResponse.json(
-        { success: false, error: "No file uploaded" },
-        { status: 400 }
-      );
+    const formData = await readUploadForm(request);
+    for (const field of ["file", "type", "year", "month", "save"]) {
+      if (formData.getAll(field).length > 1) throw new UploadError(`Duplicate ${field} field`, 400);
     }
+    const type = formData.get("type");
+    const date = parseMenuDate(formData.get("year"), formData.get("month"));
+    const saveValue = formData.get("save") ?? "false";
+    if (saveValue !== "true" && saveValue !== "false") throw new UploadError("Invalid save flag", 400);
+    const save = saveValue === "true";
 
-    if (!type || !["lunch", "dinner"].includes(type)) {
+    if (type !== "lunch" && type !== "dinner") {
       return NextResponse.json(
         { success: false, error: "Type must be 'lunch' or 'dinner'" },
         { status: 400 }
       );
     }
 
-    if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
+    if (!date) {
       return NextResponse.json(
         { success: false, error: "Invalid year or month" },
         { status: 400 }
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    const { year, month } = date;
+    const buffer = await readPdfFile(formData.get("file"));
     const result = await parsePdfBuffer(buffer, year, month);
 
     if (!result.success || !result.menus) {
@@ -63,11 +66,14 @@ export async function POST(request: NextRequest) {
       saved: save,
     });
   } catch (error) {
+    if (error instanceof UploadError) {
+      return NextResponse.json({ success: false, error: error.message }, { status: error.status });
+    }
     console.error("Parse error:", error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: "Unable to process PDF upload",
       },
       { status: 500 }
     );

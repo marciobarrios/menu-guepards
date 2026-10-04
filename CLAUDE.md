@@ -38,7 +38,8 @@ pdfs/                # Uploaded PDFs (gitignored)
 - `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID`
 - `GITHUB_TOKEN`
 - `LUNCH_PDF_URL` / `DINNER_PDF_URL` (auto-fetch)
-- `CRON_SECRET` (optional)
+- `CRON_SECRET` (required for cron; missing or blank disables scheduled operations)
+- `OWNER_SECRET` (required for manual preview/save/send and signing remembered-device sessions; rotating it invalidates all sessions; separate from CRON_SECRET)
 
 ## Data Format
 
