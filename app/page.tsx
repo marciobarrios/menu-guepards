@@ -43,8 +43,10 @@ export default function Home() {
   const [currentMenus, setCurrentMenus] = useState<MonthMenus | null>(null);
   // Only the value entered by the owner lives here, never a server-provided secret.
   const [ownerSecret, setOwnerSecret] = useState("");
+  const [rememberedOwner, setRememberedOwner] = useState(false);
+  const [checkingOwner, setCheckingOwner] = useState(true);
   const [loading, setLoading] = useState(false);
-  const manualActionsDisabled = loading || !ownerSecret.trim();
+  const manualActionsDisabled = loading || checkingOwner || (!rememberedOwner && !ownerSecret.trim());
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const loadCurrentMenus = useCallback(async () => {
@@ -66,12 +68,65 @@ export default function Home() {
     loadCurrentMenus();
   }, [loadCurrentMenus]);
 
-  async function ownerFetch(path: "/api/parse-menu" | "/api/send-menu", init: RequestInit) {
+  useEffect(() => {
+    let active = true;
+    fetch("/api/owner-session", { cache: "no-store" })
+      .then(res => res.json())
+      .then(data => { if (active) setRememberedOwner(data.remembered === true); })
+      .catch(() => {})
+      .finally(() => { if (active) setCheckingOwner(false); });
+    return () => { active = false; };
+  }, []);
+
+  async function ownerFetch(path: "/api/parse-menu" | "/api/send-menu" | "/api/owner-session", init: RequestInit) {
     const headers = new Headers(init.headers);
-    headers.set("Authorization", `Bearer ${ownerSecret}`);
+    if (ownerSecret) headers.set("Authorization", `Bearer ${ownerSecret}`);
     const response = await fetch(path, { ...init, headers });
-    if (response.status === 401) setOwnerSecret("");
+    if (response.status === 401 || response.status === 503) {
+      setOwnerSecret("");
+      setRememberedOwner(false);
+    }
     return response;
+  }
+
+  async function rememberThisDevice() {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const response = await ownerFetch("/api/owner-session", { method: "POST" });
+      const data = await response.json();
+      if (data.success) {
+        setRememberedOwner(true);
+        setOwnerSecret("");
+        setMessage({ type: "success", text: "Dispositiu recordat." });
+      } else {
+        setMessage({ type: "error", text: data.error });
+      }
+    } catch {
+      setMessage({ type: "error", text: "No s'ha pogut recordar el dispositiu." });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function forgetThisDevice() {
+    setLoading(true);
+    setMessage(null);
+    try {
+      const response = await fetch("/api/owner-session", { method: "DELETE" });
+      const data = await response.json();
+      if (data.success) {
+        setRememberedOwner(false);
+        setOwnerSecret("");
+        setMessage({ type: "success", text: "Accés oblidat en aquest dispositiu." });
+      } else {
+        setMessage({ type: "error", text: data.error });
+      }
+    } catch {
+      setMessage({ type: "error", text: "No s'ha pogut oblidar el dispositiu. Torna-ho a provar." });
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function parseFile(file: File, type: "lunch" | "dinner") {
@@ -239,33 +294,50 @@ export default function Home() {
 
       <section className="bg-white rounded-lg shadow p-6 mb-6" aria-labelledby="owner-access-heading">
         <h2 id="owner-access-heading" className="text-xl font-semibold mb-4">Accés de propietari</h2>
-        <label htmlFor="owner-secret" className="block text-sm text-gray-600 mb-1">Clau de propietari</label>
-        <div className="flex flex-wrap gap-3">
-          <input
-            id="owner-secret"
-            type="password"
-            value={ownerSecret}
-            onChange={(e) => setOwnerSecret(e.target.value)}
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck={false}
-            aria-describedby="owner-secret-help"
-            disabled={loading}
-            className="border rounded-lg px-4 py-2 text-gray-700 min-w-0 flex-1"
-          />
-          <button
-            type="button"
-            onClick={() => setOwnerSecret("")}
-            disabled={loading || !ownerSecret}
-            className="border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50"
-          >
-            Esborrar clau
-          </button>
-        </div>
-        <p id="owner-secret-help" className="text-sm text-gray-500 mt-2">
-          Introdueix la clau per pujar PDFs, guardar menús o enviar missatges.
-          La clau es manté només mentre aquesta pàgina és oberta. Pots consultar els menús sense clau.
-        </p>
+        {rememberedOwner ? (
+          <div className="flex flex-wrap gap-3 items-center">
+            <p className="text-gray-600">Accés recordat en aquest dispositiu.</p>
+            <button type="button" onClick={forgetThisDevice} disabled={loading}
+              className="border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50">
+              Oblidar aquest dispositiu
+            </button>
+          </div>
+        ) : (
+          <>
+            <label htmlFor="owner-secret" className="block text-sm text-gray-600 mb-1">Clau de propietari</label>
+            <div className="flex flex-wrap gap-3">
+              <input
+                id="owner-secret"
+                type="password"
+                value={ownerSecret}
+                onChange={(e) => setOwnerSecret(e.target.value)}
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                aria-describedby="owner-secret-help"
+                disabled={loading || checkingOwner}
+                className="border rounded-lg px-4 py-2 text-gray-700 min-w-0 flex-1"
+              />
+              <button
+                type="button"
+                onClick={() => setOwnerSecret("")}
+                disabled={loading || !ownerSecret}
+                className="border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50"
+              >
+                Esborrar clau
+              </button>
+            </div>
+            <p id="owner-secret-help" className="text-sm text-gray-500 mt-2">
+              Introdueix la clau per pujar PDFs, guardar menús o enviar missatges.
+              Pots usar-la només en aquesta visita o recordar aquest dispositiu. Pots consultar els menús sense clau.
+            </p>
+            <button type="button" onClick={rememberThisDevice}
+              disabled={loading || checkingOwner || !ownerSecret.trim()}
+              className="mt-3 border rounded-lg px-4 py-2 text-gray-700 disabled:opacity-50">
+              Recordar aquest dispositiu
+            </button>
+          </>
+        )}
       </section>
 
       {/* Upload Section */}

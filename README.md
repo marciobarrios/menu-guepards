@@ -5,8 +5,9 @@ This is just a small app to be able to parse meal pdfs for my kid's school, and 
 ## Operations
 
 Manual PDF preview/save (`POST /api/parse-menu`) and Telegram sending
-(`POST /api/send-menu`) require `Authorization: Bearer <OWNER_SECRET>` before
-reading an upload or doing other work. Public menu viewing needs no secret.
+(`POST /api/send-menu`) require `Authorization: Bearer <OWNER_SECRET>` or a valid
+remembered-device cookie before reading an upload or doing other work.
+Cookie-authorized mutations also require an exact same-origin request. Public menu viewing needs no secret.
 Missing/blank configuration disables manual operations with 503; missing/wrong
 credentials return 401. A cron credential cannot substitute for the owner secret.
 
@@ -20,10 +21,23 @@ Keep it distinct from `CRON_SECRET`, and store it in your password manager.
   `OWNER_SECRET` for Production, plus Preview if manual actions should work there.
   Use separate values for development, preview, and production. Environment
   changes take effect on a new deployment; existing deployments are unchanged.
-- In the app: enter the matching value in **Clau de propietari**. It is sent only
-  with manual-action requests over HTTPS (use localhost for development). The app
-  keeps it in page memory, not cookies or browser storage, and clears it on reload,
-  **Esborrar clau**, or an authentication failure.
+- In the app: enter the matching value in **Clau de propietari**. Without opting
+  in, it stays only in page memory and clears on reload, **Esborrar clau**, or an
+  authentication failure. Use HTTPS outside localhost development.
+- To stay signed in, click **Recordar aquest dispositiu**. The server verifies
+  the secret, then stores an opaque signed token in an HttpOnly, Secure,
+  SameSite=Strict, host-only cookie. The password is cleared from page memory and
+  is never stored in the cookie, localStorage, or sessionStorage. Local HTTP
+  loopback development uses a separate non-Secure cookie name.
+- Remembered tokens have **no application expiry**. Browser cookie retention is
+  set to 400 days and renewed on each page visit. Browsers may cap the lifetime,
+  clear cookies, or remove them earlier, so literal permanent storage cannot be
+  guaranteed. See [Chrome's cookie lifetime limits](https://developer.chrome.com/blog/cookie-max-age-expires/).
+- **Oblidar aquest dispositiu** removes the cookie from this browser. Rotating
+  `OWNER_SECRET` invalidates all issued tokens once the new value is deployed.
+  Tokens are stateless and origin-bound; forgetting removes the local copy,
+  while revoking any copied token requires secret rotation. No database or
+  additional secret is needed.
 
 Never commit the real value or prefix its name with `NEXT_PUBLIC_`. Only the empty
 template belongs in `.env.example`; the configured server secret is never embedded
@@ -60,7 +74,8 @@ npm run test:integration
 ```
 
 The integration check starts a temporary localhost production server and verifies
-cache hits, conditional writes, preservation of the other meal, and immediate
-invalidation after a save. It substitutes fake GitHub responses and blocks other
+remembered sessions, same-origin checks, forgetting, cache hits, conditional writes,
+preservation of the other meal, and immediate invalidation after a save.
+It substitutes fake GitHub responses and blocks other
 external fetches. Tests need no production credentials and never send Telegram
 messages or write production menu data.

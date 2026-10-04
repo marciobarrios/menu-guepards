@@ -32,8 +32,8 @@ server.stdout.on("data", data => { output += data; });
 server.stderr.on("data", data => { output += data; });
 const origin = `http://127.0.0.1:${port}`;
 const events = () => readFileSync(logFile, "utf8").trim().split("\n");
-const readMenus = async () => {
-  const response = await fetch(`${origin}/api/menus?year=2026&month=10`);
+const readMenus = async cookie => {
+  const response = await fetch(`${origin}/api/menus?year=2026&month=10`, { headers: cookie ? { cookie } : {} });
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store");
   return (await response.json()).menus;
@@ -70,19 +70,36 @@ try {
   form.set("month", "10");
   form.set("type", "lunch");
   form.set("save", "true");
+  const remembered = await fetch(`${origin}/api/owner-session`, {
+    method: "POST", headers: { authorization: "Bearer test-only-owner-secret", origin },
+  });
+  assert.equal(remembered.status, 200);
+  const cookie = remembered.headers.get("set-cookie").split(";")[0];
+  assert.ok(!cookie.includes("test-only-owner-secret"));
+  const refreshed = await fetch(`${origin}/api/owner-session`, { headers: { cookie } });
+  assert.equal((await refreshed.json()).remembered, true);
+  assert.ok(refreshed.headers.get("set-cookie"), "A visit refreshes browser cookie retention");
+  const csrf = await fetch(`${origin}/api/parse-menu`, { method: "POST", body: form, headers: { cookie, origin: "https://evil.example.test" } });
+  assert.equal(csrf.status, 403);
+  assert.deepEqual(events(), ["GET"], "Cross-origin cookie requests must not write");
   const saved = await fetch(`${origin}/api/parse-menu`, {
-    method: "POST", body: form, headers: { authorization: "Bearer test-only-owner-secret" },
+    method: "POST", body: form, headers: { cookie, origin },
   });
   assert.equal(saved.status, 200, await saved.clone().text());
   assert.equal((await saved.json()).saved, true);
   assert.deepEqual(events(), ["GET", "GET", "PUT"], "Save must read a fresh SHA and write once");
 
-  const afterSave = await readMenus();
+  const afterSave = await readMenus(cookie);
   assert.equal(afterSave.lunch[0].dishes[0], "Test dish");
   assert.equal(afterSave.dinner[0].dishes[0], "Preserved dinner");
   await readMenus();
   assert.deepEqual(events(), ["GET", "GET", "PUT", "GET"], "Save must invalidate and repopulate the cache");
-  console.log("Production-server smoke test passed: public cache hit, owner authorization, fresh conditional save, preserved dinner, immediate invalidation.");
+  const forgotten = await fetch(`${origin}/api/owner-session`, { method: "DELETE", headers: { cookie, origin } });
+  assert.equal(forgotten.status, 200);
+  assert.match(forgotten.headers.get("set-cookie"), /Max-Age=0/i);
+  const afterForget = await fetch(`${origin}/api/owner-session`);
+  assert.equal((await afterForget.json()).remembered, false);
+  console.log("Production-server smoke test passed: public cache, remembered owner session, CSRF rejection, conditional save, immediate invalidation and forgetting.");
 } catch (error) {
   console.error(output);
   throw error;
