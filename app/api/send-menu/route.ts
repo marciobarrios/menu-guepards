@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTodayMenus } from "@/lib/storage";
 import { sendTelegramMessage, formatMenuMessage, CATALAN_MONTHS } from "@/lib/telegram";
+import { requireCronAuthorization } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret for Vercel cron jobs
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  // Allow requests from Vercel cron (with secret) or manual triggers (no secret set)
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = requireCronAuthorization(request);
+  if (denied) return denied;
 
   try {
     const { lunch, dinner, month, year, day } = await getTodayMenus();

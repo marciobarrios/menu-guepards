@@ -1,5 +1,7 @@
 import { MonthMenus, DailyMenu } from "./types";
 import { getFileFromGitHub, saveFileToGitHub } from "./github";
+import { revalidateTag } from "next/cache";
+import { isMenuDate, menuCacheSeconds, menuCacheTag } from "./menuDate";
 
 const CATALAN_MONTHS = [
   "gener", "febrer", "març", "abril", "maig", "juny",
@@ -7,20 +9,26 @@ const CATALAN_MONTHS = [
 ];
 
 function getFilePath(year: number, month: number): string {
+  if (!isMenuDate(year, month)) throw new Error("Invalid year or month");
   return `data/menus-${year}-${String(month).padStart(2, "0")}.json`;
 }
 
-export async function saveMenus(menus: MonthMenus): Promise<boolean> {
+export async function saveMenus(menus: MonthMenus, expectedSha?: string | null): Promise<boolean> {
   const filePath = getFilePath(menus.year, menus.month);
   const monthName = CATALAN_MONTHS[menus.month - 1];
   const message = `Update menus for ${monthName} ${menus.year}`;
 
-  return saveFileToGitHub(filePath, JSON.stringify(menus, null, 2), message);
+  const success = await saveFileToGitHub(filePath, JSON.stringify(menus, null, 2), message, expectedSha);
+  if (success) revalidateTag(menuCacheTag(menus.year, menus.month));
+  return success;
 }
 
-export async function loadMenus(year: number, month: number): Promise<MonthMenus | null> {
+export async function loadMenus(year: number, month: number, options: { fresh?: boolean } = {}): Promise<MonthMenus | null> {
   const filePath = getFilePath(year, month);
-  const file = await getFileFromGitHub(filePath);
+  const file = await getFileFromGitHub(filePath, options.fresh ? undefined : {
+    revalidate: menuCacheSeconds(year, month),
+    tags: [menuCacheTag(year, month)],
+  });
 
   if (!file) {
     return null;
@@ -33,17 +41,28 @@ export async function loadMenus(year: number, month: number): Promise<MonthMenus
   }
 }
 
-export async function updateLunchMenus(
+export async function updateMenus(
   year: number,
   month: number,
-  lunch: DailyMenu[]
+  updates: Partial<Pick<MonthMenus, "lunch" | "dinner">>
 ): Promise<{ success: boolean; menus?: MonthMenus }> {
-  const existing = await loadMenus(year, month);
+  const file = await getFileFromGitHub(getFilePath(year, month));
+  // Do not replace an unreadable file with a partial menu.
+  let existing: MonthMenus | null;
+  try {
+    existing = file ? JSON.parse(file.content) : null;
+  } catch {
+    return { success: false };
+  }
   const menus: MonthMenus = existing || { year, month, lunch: [], dinner: [] };
-  menus.lunch = lunch;
+  Object.assign(menus, updates);
 
-  const success = await saveMenus(menus);
+  const success = await saveMenus(menus, file?.sha ?? null);
   return { success, menus: success ? menus : undefined };
+}
+
+export async function updateLunchMenus(year: number, month: number, lunch: DailyMenu[]) {
+  return updateMenus(year, month, { lunch });
 }
 
 export async function updateDinnerMenus(
@@ -51,12 +70,7 @@ export async function updateDinnerMenus(
   month: number,
   dinner: DailyMenu[]
 ): Promise<{ success: boolean; menus?: MonthMenus }> {
-  const existing = await loadMenus(year, month);
-  const menus: MonthMenus = existing || { year, month, lunch: [], dinner: [] };
-  menus.dinner = dinner;
-
-  const success = await saveMenus(menus);
-  return { success, menus: success ? menus : undefined };
+  return updateMenus(year, month, { dinner });
 }
 
 export async function getTodayMenus(): Promise<{
@@ -71,7 +85,7 @@ export async function getTodayMenus(): Promise<{
   const month = now.getUTCMonth() + 1;
   const day = now.getUTCDate();
 
-  const menus = await loadMenus(year, month);
+  const menus = await loadMenus(year, month, { fresh: true });
 
   return {
     lunch: menus?.lunch.find((m) => m.day === day) || null,

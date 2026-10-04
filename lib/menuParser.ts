@@ -1,5 +1,7 @@
 import { DailyMenu, ParsedMenuResult } from "./types";
 import { validateMenuPeriod } from "./menuPeriod";
+import { validatePdfBuffer } from "./pdfValidation";
+import { isMenuDate } from "./menuDate";
 
 interface TextItem {
   str: string;
@@ -96,7 +98,8 @@ async function extractTextItems(
     });
   }
 
-  const data = await (pdfParse as any)(buffer, { pagerender: customRender });
+  // PDF.js expects typed-array slice semantics; Buffer.slice() returns a view.
+  const data = await (pdfParse as any)(new Uint8Array(buffer), { pagerender: customRender });
   const title = typeof data.info?.Title === "string" ? data.info.Title : "";
 
   return { items, rawText, title };
@@ -272,6 +275,10 @@ export async function parsePdfBuffer(
   year: number,
   month: number
 ): Promise<ParsedMenuResult> {
+  const validationError = validatePdfBuffer(buffer);
+  if (validationError || !isMenuDate(year, month)) {
+    return { success: false, error: validationError || "Invalid year or month" };
+  }
   try {
     const { items, rawText, title } = await extractTextItems(buffer);
     // The school's fixed URLs can still serve the previous month's PDF.

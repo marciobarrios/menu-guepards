@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface DailyMenu {
   day: number;
@@ -44,12 +44,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Load current month's menus on mount and when selection changes
-  useEffect(() => {
-    loadCurrentMenus();
-  }, [selectedYear, selectedMonth]);
-
-  async function loadCurrentMenus() {
+  const loadCurrentMenus = useCallback(async () => {
     try {
       const res = await fetch(`/api/menus?year=${selectedYear}&month=${selectedMonth}`);
       const data = await res.json();
@@ -61,7 +56,12 @@ export default function Home() {
     } catch {
       setCurrentMenus(null);
     }
-  }
+  }, [selectedYear, selectedMonth]);
+
+  // Load current month's menus on mount and when selection changes
+  useEffect(() => {
+    loadCurrentMenus();
+  }, [loadCurrentMenus]);
 
   async function parseFile(file: File, type: "lunch" | "dinner") {
     setLoading(true);
@@ -381,7 +381,7 @@ export default function Home() {
 
       {/* Send Now Section */}
       <section className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Enviar menú d'avui</h2>
+        <h2 className="text-xl font-semibold mb-4">Enviar menú d&apos;avui</h2>
         <p className="text-gray-600 mb-4">
           Envia el menú del dia actual via Telegram.
         </p>

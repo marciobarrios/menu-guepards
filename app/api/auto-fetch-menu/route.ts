@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchPdfFromUrl } from "@/lib/pdfFetcher";
 import { parsePdfBuffer } from "@/lib/menuParser";
-import { loadMenus, updateLunchMenus, updateDinnerMenus } from "@/lib/storage";
+import { loadMenus, updateMenus } from "@/lib/storage";
 import { sendTelegramMessage } from "@/lib/telegram";
+import { requireCronAuthorization } from "@/lib/auth";
+import { DailyMenu } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -10,13 +12,8 @@ const LUNCH_PDF_URL = process.env.LUNCH_PDF_URL || "https://www.ambitescola.cat/
 const DINNER_PDF_URL = process.env.DINNER_PDF_URL || "https://www.ambitescola.cat/_menus/ArturMartorell-Sopars.pdf";
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret for Vercel cron jobs
-  const authHeader = request.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const denied = requireCronAuthorization(request);
+  if (denied) return denied;
 
   const now = new Date();
   const day = now.getUTCDate();
@@ -34,7 +31,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Check if menus already exist for this month
-  const existingMenus = await loadMenus(year, month);
+  const existingMenus = await loadMenus(year, month, { fresh: true });
   const hasLunch = existingMenus?.lunch && existingMenus.lunch.length > 0;
   const hasDinner = existingMenus?.dinner && existingMenus.dinner.length > 0;
 
@@ -53,7 +50,9 @@ export async function GET(request: NextRequest) {
     dinner: { fetched: false, parsed: false, saved: false, error: null as string | null },
   };
 
-  // Fetch and process lunch menu if not already present
+  const updates: { lunch?: DailyMenu[]; dinner?: DailyMenu[] } = {};
+
+  // Parse both PDFs before saving so a complete pair needs only one commit.
   if (!hasLunch) {
     console.log(`Fetching lunch PDF from ${LUNCH_PDF_URL}`);
     const lunchBuffer = await fetchPdfFromUrl(LUNCH_PDF_URL);
@@ -64,11 +63,7 @@ export async function GET(request: NextRequest) {
 
       if (parseResult.success && parseResult.menus) {
         results.lunch.parsed = true;
-        const saveResult = await updateLunchMenus(year, month, parseResult.menus);
-        results.lunch.saved = saveResult.success;
-        if (!saveResult.success) {
-          results.lunch.error = "Failed to save to GitHub";
-        }
+        updates.lunch = parseResult.menus;
       } else {
         results.lunch.error = parseResult.error || "Parse failed";
       }
@@ -92,11 +87,7 @@ export async function GET(request: NextRequest) {
 
       if (parseResult.success && parseResult.menus) {
         results.dinner.parsed = true;
-        const saveResult = await updateDinnerMenus(year, month, parseResult.menus);
-        results.dinner.saved = saveResult.success;
-        if (!saveResult.success) {
-          results.dinner.error = "Failed to save to GitHub";
-        }
+        updates.dinner = parseResult.menus;
       } else {
         results.dinner.error = parseResult.error || "Parse failed";
       }
@@ -107,6 +98,16 @@ export async function GET(request: NextRequest) {
     results.dinner.fetched = true;
     results.dinner.parsed = true;
     results.dinner.saved = true;
+  }
+
+  if (updates.lunch || updates.dinner) {
+    const saved = await updateMenus(year, month, updates);
+    for (const type of ["lunch", "dinner"] as const) {
+      if (updates[type]) {
+        results[type].saved = saved.success;
+        if (!saved.success) results[type].error = "Failed to save to GitHub";
+      }
+    }
   }
 
   const success = results.lunch.saved && results.dinner.saved;
