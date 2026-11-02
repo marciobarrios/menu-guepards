@@ -65,7 +65,8 @@ try {
   assert.deepEqual(events(), ["GET"], "Unauthorized requests must not read or write GitHub");
 
   const form = new FormData();
-  form.set("file", new Blob([menuPdf()], { type: "application/pdf" }), "menu.pdf");
+  const pdf = menuPdf("octubre 2026", ["- Test dish", "- Dietary variant", "Different format variant"]);
+  form.set("file", new Blob([pdf], { type: "application/pdf" }), "menu.pdf");
   form.set("year", "2026");
   form.set("month", "10");
   form.set("type", "lunch");
@@ -90,7 +91,8 @@ try {
   assert.deepEqual(events(), ["GET", "GET", "PUT"], "Save must read a fresh SHA and write once");
 
   const afterSave = await readMenus(cookie);
-  assert.equal(afterSave.lunch[0].dishes[0], "Test dish");
+  assert.deepEqual(afterSave.lunch, [5, 6, 7, 8, 9].map(day => ({ day, dishes: ["Test dish"] })),
+    "Only the standard menu from page 1 must be saved");
   assert.equal(afterSave.dinner[0].dishes[0], "Preserved dinner");
   await readMenus();
   assert.deepEqual(events(), ["GET", "GET", "PUT", "GET"], "Save must invalidate and repopulate the cache");

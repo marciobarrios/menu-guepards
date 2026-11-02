@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { readMenuUploadResponse } from "@/lib/uploadResponse";
+import { createMenuUploadForm } from "@/lib/menuUpload";
 
 interface DailyMenu {
   day: number;
@@ -47,7 +49,7 @@ export default function Home() {
   const [checkingOwner, setCheckingOwner] = useState(true);
   const [loading, setLoading] = useState(false);
   const manualActionsDisabled = loading || checkingOwner || (!rememberedOwner && !ownerSecret.trim());
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: "success" | "warning" | "error"; text: string } | null>(null);
 
   const loadCurrentMenus = useCallback(async () => {
     try {
@@ -133,32 +135,22 @@ export default function Home() {
     setLoading(true);
     setMessage(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", type);
-    formData.append("year", selectedYear.toString());
-    formData.append("month", selectedMonth.toString());
-    formData.append("save", "false");
-
     try {
+      const formData = await createMenuUploadForm(file, type, selectedYear, selectedMonth, false);
       const res = await ownerFetch("/api/parse-menu", {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+      const data = await readMenuUploadResponse(res);
 
-      if (data.success) {
-        if (type === "lunch") {
-          setLunchPreview(data.menus);
-        } else {
-          setDinnerPreview(data.menus);
-        }
-        setMessage({ type: "success", text: `S'han trobat ${data.menus.length} dies al PDF` });
+      if (type === "lunch") {
+        setLunchPreview(data.menus);
       } else {
-        setMessage({ type: "error", text: data.error });
+        setDinnerPreview(data.menus);
       }
+      setMessage({ type: data.warning ? "warning" : "success", text: `S'han trobat ${data.menus.length} dies al PDF. ${data.warning || ""}`.trim() });
     } catch (error) {
-      setMessage({ type: "error", text: "Error processant el PDF" });
+      setMessage({ type: "error", text: error instanceof Error ? error.message : "Error processant el PDF" });
     } finally {
       setLoading(false);
     }
@@ -171,35 +163,25 @@ export default function Home() {
     setLoading(true);
     setMessage(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", type);
-    formData.append("year", selectedYear.toString());
-    formData.append("month", selectedMonth.toString());
-    formData.append("save", "true");
-
     try {
+      const formData = await createMenuUploadForm(file, type, selectedYear, selectedMonth, true);
       const res = await ownerFetch("/api/parse-menu", {
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+      await readMenuUploadResponse(res);
 
-      if (data.success) {
-        setMessage({ type: "success", text: `Menús de ${type === "lunch" ? "dinar" : "sopar"} guardats!` });
-        loadCurrentMenus();
-        if (type === "lunch") {
-          setLunchFile(null);
-          setLunchPreview(null);
-        } else {
-          setDinnerFile(null);
-          setDinnerPreview(null);
-        }
+      setMessage({ type: "success", text: `Menús de ${type === "lunch" ? "dinar" : "sopar"} guardats!` });
+      loadCurrentMenus();
+      if (type === "lunch") {
+        setLunchFile(null);
+        setLunchPreview(null);
       } else {
-        setMessage({ type: "error", text: data.error });
+        setDinnerFile(null);
+        setDinnerPreview(null);
       }
-    } catch {
-      setMessage({ type: "error", text: "Error guardant els menús" });
+    } catch (error) {
+      setMessage({ type: "error", text: error instanceof Error ? error.message : "Error guardant els menús" });
     } finally {
       setLoading(false);
     }
@@ -247,7 +229,7 @@ export default function Home() {
       {message && (
         <div
           className={`mb-6 p-4 rounded-lg ${
-            message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+            message.type === "success" ? "bg-green-100 text-green-800" : message.type === "warning" ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"
           }`}
         >
           {message.text}
