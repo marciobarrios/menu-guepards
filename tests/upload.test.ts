@@ -97,7 +97,7 @@ it("returns a client error for malformed multipart input", async () => {
 it("previews a validated PDF without writing", async () => {
   const response = await POST(request(upload()));
   expect(await response.json()).toEqual({ success: true, menus: meal, saved: false });
-  expect(parsePdfBuffer).toHaveBeenCalledWith(expect.any(Buffer), 2026, 10);
+  expect(parsePdfBuffer).toHaveBeenCalledWith(expect.any(Buffer), 2026, 10, { allowMissingPeriod: true });
   expect(updateLunchMenus).not.toHaveBeenCalled();
 });
 
@@ -116,4 +116,9 @@ it("does not save a PDF rejected by the parser/month validation", async () => {
   form.set("save", "true");
   expect((await POST(request(form))).status).toBe(400);
   expect(updateLunchMenus).not.toHaveBeenCalled();
+});
+
+it("passes the missing-period warning through to the manual preview", async () => {
+  vi.mocked(parsePdfBuffer).mockResolvedValue({ success: true, menus: meal, warning: "Check the selected month" });
+  expect(await (await POST(request(upload()))).json()).toMatchObject({ warning: "Check the selected month", saved: false });
 });

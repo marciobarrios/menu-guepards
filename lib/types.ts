@@ -14,6 +14,7 @@ export interface ParsedMenuResult {
   success: boolean;
   menus?: DailyMenu[];
   error?: string;
+  warning?: string;
 }
 
 export interface SendResult {

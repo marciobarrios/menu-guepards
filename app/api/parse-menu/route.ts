@@ -36,7 +36,10 @@ export async function POST(request: NextRequest) {
 
     const { year, month } = date;
     const buffer = await readPdfFile(formData.get("file"));
-    const result = await parsePdfBuffer(buffer, year, month);
+    // Manual uploads show a preview before saving. Some school PDFs have their
+    // date outlined as graphics and an empty title; warn rather than invent it.
+    // Automatic fetching keeps strict period validation in parsePdfBuffer.
+    const result = await parsePdfBuffer(buffer, year, month, { allowMissingPeriod: true });
 
     if (!result.success || !result.menus) {
       return NextResponse.json(
@@ -64,6 +67,7 @@ export async function POST(request: NextRequest) {
       success: true,
       menus: result.menus,
       saved: save,
+      ...(result.warning ? { warning: result.warning } : {}),
     });
   } catch (error) {
     if (error instanceof UploadError) {

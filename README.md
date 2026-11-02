@@ -52,6 +52,14 @@ Uploads accept non-empty PDFs up to 4 MiB with a `.pdf` filename,
 `application/pdf` type, PDF header and end marker. The multipart request is also
 bounded while streaming, even without a trustworthy Content-Length. The parser
 still validates the PDF structure and its menu month before saving.
+Only the first page is parsed (the standard menu); dietary variants on later
+pages are ignored for both manual uploads and automatic fetching.
+The browser accepts source PDFs up to 20 MiB and extracts page 1 before upload,
+so a bundle of dietary variants does not exceed the server's upload limit.
+If neither the title nor page 1's text contains a readable month/year, manual
+previews ask the owner to check the selected date before saving. Known date
+mismatches are still rejected; automatic fetching always requires a detectable
+matching period. Dates drawn as graphics cannot be read as PDF text.
 
 Date inputs use years `2000`–`2099` and unpadded months `1`–`12` (for example,
 `/api/menus?year=2026&month=10`). Successful GitHub reads for current/future months

@@ -3,12 +3,17 @@ declare module "pdf-parse" {
     text: string;
     numpages: number;
     numrender: number;
-    info: Record<string, unknown>;
+    info: Record<string, unknown> | null;
     metadata: Record<string, unknown>;
     version: string;
   }
 
-  function pdfParse(buffer: Buffer): Promise<PDFData>;
+  interface PDFOptions {
+    max?: number;
+    pagerender?: (page: any) => Promise<string>;
+  }
+
+  function pdfParse(buffer: Uint8Array, options?: PDFOptions): Promise<PDFData>;
 
   export default pdfParse;
 }

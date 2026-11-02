@@ -1,5 +1,5 @@
 import { DailyMenu, ParsedMenuResult } from "./types";
-import { validateMenuPeriod } from "./menuPeriod";
+import { getMenuPeriodFromTitle, validateMenuPeriod } from "./menuPeriod";
 import { validatePdfBuffer } from "./pdfValidation";
 import { isMenuDate } from "./menuDate";
 
@@ -64,7 +64,7 @@ function assignToRow(y: number, rowBoundaries: number[]): number {
 }
 
 /**
- * Extract text items with (x, y) positions from a PDF buffer.
+ * Extract text items with (x, y) positions from the standard menu on page 1.
  */
 async function extractTextItems(
   buffer: Buffer
@@ -99,7 +99,9 @@ async function extractTextItems(
   }
 
   // PDF.js expects typed-array slice semantics; Buffer.slice() returns a view.
-  const data = await (pdfParse as any)(new Uint8Array(buffer), { pagerender: customRender });
+  // Later pages contain dietary variants, whose grids must never be combined
+  // with the standard menu. Limit PDF.js rendering as well as text extraction.
+  const data = await pdfParse(new Uint8Array(buffer), { pagerender: customRender, max: 1 });
   const title = typeof data.info?.Title === "string" ? data.info.Title : "";
 
   return { items, rawText, title };
@@ -273,7 +275,8 @@ function parseGrid(
 export async function parsePdfBuffer(
   buffer: Buffer,
   year: number,
-  month: number
+  month: number,
+  options: { allowMissingPeriod?: boolean } = {},
 ): Promise<ParsedMenuResult> {
   const validationError = validatePdfBuffer(buffer);
   if (validationError || !isMenuDate(year, month)) {
@@ -283,9 +286,11 @@ export async function parsePdfBuffer(
     const { items, rawText, title } = await extractTextItems(buffer);
     // The school's fixed URLs can still serve the previous month's PDF.
     // Reject it before its grid is mapped onto the requested calendar month.
-    const periodError = validateMenuPeriod(title, year, month);
+    const periodText = getMenuPeriodFromTitle(title) ? title : rawText;
+    const hasPeriod = getMenuPeriodFromTitle(periodText) !== null;
+    const periodError = validateMenuPeriod(periodText, year, month);
 
-    if (periodError) {
+    if (periodError && (hasPeriod || !options.allowMissingPeriod)) {
       return {
         success: false,
         error: periodError,
@@ -304,7 +309,11 @@ export async function parsePdfBuffer(
       };
     }
 
-    return { success: true, menus };
+    return {
+      success: true,
+      menus,
+      ...(!hasPeriod ? { warning: `${periodError}. Comprova el mes i l'any seleccionats abans de guardar.` } : {}),
+    };
   } catch (error) {
     return {
       success: false,
